@@ -1,4 +1,5 @@
 ﻿using BAL;
+using BAL.EmailContents;
 using DAL.Models;
 using DAL.Models.DTO.Account;
 using DAL.Models.HelperModels;
@@ -111,7 +112,8 @@ namespace BlogProjeAPI.Controllers.UserOnly
             }
 
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, dto.NewEmail);
-            await _emailService.SendEmail(token, user.Email, "emailChange", dto.NewEmail);
+            EmailChangeContent emailChangeContent = new EmailChangeContent(token,user.Email,dto.NewEmail);
+            await _emailService.SendEmail(emailChangeContent, user.Email);
 
             return Ok("Email change request sent.");
         }
@@ -149,7 +151,8 @@ namespace BlogProjeAPI.Controllers.UserOnly
                 }
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                await _emailService.SendEmail(token, user.Email, "emailConfirm");
+                EmailConfirmationContent EmailConfirmationContent = new EmailConfirmationContent(token, user.Email);
+                await _emailService.SendEmail(EmailConfirmationContent,user.Email);
                 return Ok(new ApiResponse { Success = true, Message = "Email confirmation sent." });
             }
             catch (Exception ex)
