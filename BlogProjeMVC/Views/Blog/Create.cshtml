@@ -1,0 +1,43 @@
+﻿@using DAL.Models.DTO.Blog;
+@model BlogDTO
+
+@{
+    ViewData["Title"] = "Create Blog Post";
+}
+
+<div class="container mt-5 mb-3">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <form asp-action="Create" asp-controller="Blog" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label asp-for="BlogTitle" class="form-label"></label>
+            <input asp-for="BlogTitle" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="BlogTags" class="form-label">Tags (separate with commas)</label>
+            <input asp-for="BlogTags" class="form-control" placeholder="Enter tags separated by commas" />
+            <div class="form-text">Please enter tags separated by commas.</div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label">Content</label>
+            <textarea asp-for="Content" class="form-control" rows="6"></textarea>
+        </div>
+        <div class="mb-3">
+            <label asp-for="SelectedCategoryId" class="form-label">Category</label>
+            <select asp-for="SelectedCategoryId" asp-items="@(new SelectList(ViewBag.Categories, "CategoryID", "CategoryName"))" class="form-select">
+                <option value="">Select a category</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label asp-for="IsActive" class="form-label">Active</label>
+            <input asp-for="IsActive" type="checkbox" class="form-check-input" />
+            <div class="form-text">Check to make the blog active.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Image</label>
+            <input type="file" accept=".jpg, .jpeg, .png" name="ImageFile" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>

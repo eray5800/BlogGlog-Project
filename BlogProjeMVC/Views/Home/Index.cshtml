@@ -1,0 +1,96 @@
+﻿@using DAL.Models
+@using BlogProjeMVC.HtmlHelpers
+@model IEnumerable<Blog>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="container">
+    <div class="row">
+        @if (ViewBag.SuccessMessage != null)
+        {
+            <div class="alert alert-success">
+                @ViewBag.SuccessMessage
+            </div>
+        }
+        <!-- Blog entries -->
+        <div class="col-lg-8">
+            <!-- Nested row for blog posts -->
+            <div class="row">
+                @for (var i = 0; i < Model.Count(); i += 2)
+                {
+                    var blog1 = Model.ElementAt(i);
+                    var blog2 = i + 1 < Model.Count() ? Model.ElementAt(i + 1) : null;
+
+                    <div class="col-lg-6 mb-4">
+                        <div class="card blogcard mb-4">
+                            <a asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog1.BlogId">
+                                <img class="card-img-top blogcard-img-top" src="@String.Concat(@ViewBag.BlogImageBasePath,blog1.BlogImage)" alt="Blog Image" />
+                            </a>
+                            <div class="card-body blogcard-body">
+                                <div class="small text-muted">@blog1.Created_At.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("en-US"))</div>
+                                <h2 class="card-title h4">@blog1.BlogTitle <a asp-action="CategorySearch" asp-controller="Blog" asp-route-categoryName="@blog1.Category.CategoryName" class="btn btn-dark">@blog1.Category.CategoryName</a></h2>
+                                <p class="card-text">@Html.ShortenContent(blog1.Content, 150)</p>
+                                <a class="btn btn-primary" asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog1.BlogId">Read more →</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (blog2 != null)
+                    {
+                        <div class="col-lg-6 mb-4">
+                            <div class="card blogcard mb-4">
+                                <a asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog2.BlogId">
+                                    <img class="card-img-top blogcard-img-top" src="@String.Concat(@ViewBag.BlogImageBasePath,blog2.BlogImage)" alt="Blog Image" />
+                                </a>
+                                <div class="card-body blogcard-body">
+                                    <div class="small text-muted">@blog1.Created_At.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("en-US"))</div>
+                                    <h2 class="card-title h4">@blog2.BlogTitle <a asp-action="CategorySearch" asp-controller="Blog" asp-route-categoryName="@blog2.Category.CategoryName" class="btn btn-dark">@blog2.Category.CategoryName</a></h2>
+                                    <p class="card-text">@Html.ShortenContent(blog2.Content, 150)</p>                                    <a class="btn btn-primary" asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog2.BlogId">Read more →</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Side widgets -->
+        <div class="col-lg-4">
+            <!-- Search widget -->
+            <div class="card mb-4">
+                <div class="card-header">Search</div>
+                <div class="card-body">
+                    <form asp-action="Search" asp-controller="Blog" method="get">
+                        <div class="text-danger" asp-validation-summary="All"></div>
+                        <div class="input-group">
+                            <input class="form-control" type="text" name="textSearch" placeholder="Enter search term..." aria-label="Enter search term..." aria-describedby="button-search" />
+                            <button class="btn btn-primary" id="button-search" type="submit">Go!</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- Categories widget -->
+            <!-- Categories widget -->
+            <div class="card mb-4">
+                <div class="card-header">Categories</div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <div class="col-sm-6 mb-2">
+                                <a asp-action="CategorySearch" asp-controller="Blog" asp-route-categoryName="@category.CategoryName" class="btn btn-dark w-100">@category.CategoryName</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>

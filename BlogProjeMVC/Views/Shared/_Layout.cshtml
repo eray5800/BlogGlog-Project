@@ -1,0 +1,125 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+<html lang="en" class="d-flex flex-column h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>@ViewData["Title"] - BlogGlog</title>
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="~/normalUserTemplate/css/styles.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+<body class="d-flex flex-column h-100">
+    <!-- Responsive navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">BlogGlog</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-center ">
+                    <li class="nav-item">
+                        <a class="btn btn-primary m-2" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("JWToken") != null)
+                    {
+                        var userRoles = HttpContextAccessor.HttpContext.Session.GetString("UserRoles");
+                        if (userRoles != null)
+                        {
+                            var roles = userRoles.Split(','); // Assuming roles are stored as comma-separated values
+                            if (roles.Contains("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a asp-action="Dashboard" asp-controller="Admin" class="btn btn-light m-2">Admin Panel</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="Profile" asp-controller="Account" class="btn btn-light m-2">Profile</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="Create" asp-controller="Blog" class="btn btn-light m-2">Create Blog</a>
+                                </li>
+                            }
+                            else if (roles.Contains("Writer"))
+                            {
+                                <li class="nav-item">
+                                    <a asp-action="Profile" asp-controller="Account" class="btn btn-light m-2">Profile</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="Create" asp-controller="Blog" class="btn btn-light m-2">Create Blog</a>
+                                </li>
+                            }
+                            else if (roles.Contains("User"))
+                            {
+                                <li class="nav-item">
+                                    <button class="btn btn-success m-2" data-bs-toggle="modal" data-bs-target="#writerRoleRequestModal">Send Writer Role Request</button>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="Profile" asp-controller="Account" class="btn btn-light m-2">Profile</a>
+                                </li>
+                            }
+                        }
+                        <li class="nav-item">
+                            <a asp-action="Logout" asp-controller="Auth" class="btn btn-danger m-2">Logout</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="btn btn-primary m-2" asp-area="" asp-controller="Auth" asp-action="Register">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary m-2" asp-area="" asp-controller="Auth" asp-action="Login">Login</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Page header with logo and tagline-->
+    <header class="py-5 bg-light border-bottom mb-4">
+        <div class="container">
+            <div class="text-center my-5">
+                <h1 class="fw-bolder">Welcome to BlogGlog!</h1>
+            </div>
+        </div>
+    </header>
+    <!-- Page content-->
+    @RenderBody()
+
+    <!-- Modal -->
+    <div class="modal fade" id="writerRoleRequestModal" tabindex="-1" aria-labelledby="writerRoleRequestModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="writerRoleRequestModalLabel">Send Writer Role Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="AddWriterRequest" asp-controller="Writer" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="RequestDescription" class="form-label">Reason for Request</label>
+                            <input type="text" class="form-control" name="RequestDescription" id="RequestDescription" placeholder="Enter the reason for your request...">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="sendRequestBtn">Send Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer-->
+    <footer class="py-5 bg-dark mt-auto flex-shrink-0">
+        <div class="container">
+            <p class="m-0 text-center text-white">Copyright &copy; BlogGlog 2023</p>
+        </div>
+    </footer>
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="~/normalUserTemplate/js/scripts.js"></script>
+</body>
+</html>

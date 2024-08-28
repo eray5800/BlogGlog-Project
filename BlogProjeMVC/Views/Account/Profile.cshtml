@@ -1,0 +1,133 @@
+﻿@using DAL.Models.HelperModels
+@inject IHttpContextAccessor HttpContextAccessor
+@model UserBlogs
+
+@{
+    ViewData["Title"] = "Profile";
+    string role = HttpContextAccessor.HttpContext.Session.GetString("UserRoles");
+    bool isRoleWriterOrAdmin = role == "Admin" ? true : (role == "Writer" ? true : false);
+
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert alert-success">
+                    @ViewBag.SuccessMessage
+                </div>
+            }
+
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="card p-2 mb-4">
+                <div class="d-flex justify-content-between">
+                    <div>Email: @Model.User.Email</div>
+                    <div>
+                        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">Change Email</a>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <div>Do you want to change your Password?</div>
+                    <div>
+                        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
+                    </div>
+                </div>
+            </div>
+
+            @if (isRoleWriterOrAdmin)
+            {
+                <!-- Blog Table in a Card -->
+                <div class="card mt-4 mb-4">
+                    <div class="card-header">
+                        <h3>Your Blogs</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Blog Title</th>
+                                    <th scope="col">Created At</th>
+                                    <th scope="col">Updated At</th>
+                                    <th scope="col">Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var blog in Model.Blogs)
+                                {
+                                    <tr>
+                                        <td>@blog.BlogTitle</td>
+                                        <td>@blog.Created_At.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@blog.Updated_At.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <a asp-action="Update" asp-controller="Blog" asp-route-blogID="@blog.BlogId" class="btn btn-warning">Update</a>
+                                            <form asp-action="DeleteBlog" asp-controller="Blog" asp-route-blogID="@blog.BlogId" method="post" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<!-- Change Email Modal -->
+<div class="modal fade" id="changeEmailModal" tabindex="-1" aria-labelledby="changeEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeEmailModalLabel">Change Email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="RequestEmailChange" asp-controller="Account" method="post">
+                    <div class="mb-3">
+                        <label for="newEmail" class="form-label">New Email</label>
+                        <input type="email" class="form-control" id="newEmail" name="newEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="Password" name="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="ChangePassword" asp-controller="Account" method="post">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

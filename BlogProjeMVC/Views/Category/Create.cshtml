@@ -1,0 +1,38 @@
+﻿@using DAL.Models
+@model CategoryDTO
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Create Category";
+}
+
+<div class="container mt-2">
+    <div class="page-title">
+        <h3>Create Category</h3>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">Create Category Form</div>
+                <div class="card-body">
+                    <div class="text-danger " asp-validation-summary="All"></div>
+
+                    <form asp-action="Create" asp-controller="Category" method="post">
+                        <div class="mb-3">
+                            <label asp-for="CategoryName" class="form-label">Category Name</label>
+                            <input type="text"  asp-for="CategoryName" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="IsActive" class="form-label">Is Active?</label>
+                            <select asp-for="IsActive" class="form-select" required>
+                                <option value="false">Not Active</option>
+                                <option value="true">Active</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                           <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>

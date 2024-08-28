@@ -1,0 +1,44 @@
+/*html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+*/
+
+
+.blogcard {
+    height: 100% !important; /* Kartlarýn yüksekliðini tamamen kapsamasýný saðlar */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+.blogcard-body {
+    flex-grow: 1 !important; /* Kart içeriðinin esnek olmasýný saðlar */
+}
+
+.blogcard-img-top {
+    width: 100% !important;
+    height: 200px !important; /* Ýstediðiniz yüksekliði ayarlayýn */
+    object-fit: cover !important; /* Resmin boyutunu koruyarak kýrpma yapar */
+}
+
+}
+

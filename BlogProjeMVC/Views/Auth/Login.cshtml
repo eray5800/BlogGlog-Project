@@ -1,0 +1,22 @@
+﻿@using DAL.Models
+@model AuthLoginDTO
+@{
+    ViewData["Title"] = "Login Page";
+}
+
+<div class="container mt-5 mb-3">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <form asp-action="Login" asp-controller="Auth" method="post">
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" type="email" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" type="password" />
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>

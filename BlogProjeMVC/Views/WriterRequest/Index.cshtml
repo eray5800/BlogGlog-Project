@@ -1,0 +1,87 @@
+﻿@using DAL.Models
+@using BlogProjeMVC.HtmlHelpers
+@model IEnumerable<WriterRequest>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Write Requests";
+}
+
+<div class="container mt-2 mb-3">
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <h3 class="m-0">Writer Requests</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">Writer Request List</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Description</th>
+                                    <th>Request Date</th>
+                                    <th>Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var request in Model)
+                                {
+                                    <tr>
+                                        <td>@request.User.UserName</td>
+                                        <td>
+                                            @if (request.RequestDescription.Length > 50)
+                                            {
+                                                <span>@Html.ShortenContent(request.RequestDescription, 50)</span>
+                                                <!-- Button trigger modal -->
+                                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modal-@request.WriterRequestID">
+                                                    Read more
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                @request.RequestDescription
+                                            }
+                                        </td>
+                                        <td>@request.RequestDate</td>
+                                        <td class="d-flex">
+                                            <form asp-action="Approve" asp-controller="WriterRequest">
+                                                <input value="@request.WriterRequestID" name="writerRequestId" type="hidden" />
+                                                <button type="submit" class="btn btn-sm btn-success me-1">Approve</button>
+                                            </form>
+                                            <form asp-action="Reject" asp-controller="WriterRequest">
+                                                <input value="@request.WriterRequestID" name="writerRequestId" type="hidden" />
+                                                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="modal-@request.WriterRequestID" tabindex="-1" role="dialog" aria-labelledby="modalLabel-@request.WriterRequestID" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="modalLabel-@request.WriterRequestID">Request Details</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @request.RequestDescription
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

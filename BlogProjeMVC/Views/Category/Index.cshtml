@@ -1,0 +1,55 @@
+﻿@using DAL.Models
+@model IEnumerable<Category>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Categories";
+}
+
+<div class="container mt-2 mb-3">
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <h3 class="m-0">Categories</h3>
+        <a asp-controller="Category" asp-action="Create" class="btn btn-sm btn-primary p-2">Create Product</a>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">Category List</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+
+                            <thead>
+                                <tr>
+                                    <th>Category Name</th>
+                                    <th>IsActive</th>
+                                    <th>Creationg Date</th>
+                                    <th>Last Update Date</th>
+                                    <th>Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (Category category in Model)
+                                {
+                                    <tr>
+                                        <td>@category.CategoryName</td>
+                                        <td>@category.IsActive.ToString()</td>
+                                        <td>@category.Created_At</td>
+                                        <th>@category.Updated_At</th>
+                                        <th class="d-flex">
+                                            <a asp-action="Update" class="btn btn-sm btn-primary me-1" asp-route-categoryID="@category.CategoryID" asp-controller="Category">Update</a>
+                                            <form asp-action="Delete" asp-asp-controller="Category">
+                                                <input value="@category.CategoryID" name="categoryID" class="form-control" type="hidden" />
+                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+
+                                            </form>
+                                        </th>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

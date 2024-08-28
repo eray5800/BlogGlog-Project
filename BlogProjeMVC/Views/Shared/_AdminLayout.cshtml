@@ -1,0 +1,65 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewData["Title"] - BlogGlog</title>
+    <link href="~/assets/vendor/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/fontawesome/css/solid.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/fontawesome/css/brands.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/assets/vendor/datatables/datatables.min.css" rel="stylesheet">
+    <link href="~/assets/css/master.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- sidebar navigation component -->
+        <nav id="sidebar" class="active">
+            <div class="sidebar-header">
+                <img src="~/assets/img/bootstraper-logo.png" alt="bootraper logo" class="app-logo">
+            </div>
+            <ul class="list-unstyled components text-secondary">
+                <li>
+                    <a asp-action="Dashboard" asp-controller="Admin"><i class="fas fa-home"></i>Dashboard</a>
+                </li>
+                <li>
+                    <a asp-action="Index" asp-controller="Category"><i class="fas fa-tags"></i>Categories</a>
+                </li>
+                <li>
+                    <a asp-action="Index" asp-controller="WriterRequest"><i class="fas fa-pen"></i>Write Requests</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- end of sidebar component -->
+        <div id="body" class="active">
+            <!-- navbar navigation component -->
+            <nav class="navbar navbar-expand-lg navbar-white bg-white">
+                <button type="button" id="sidebarCollapse" class="btn btn-light">
+                    <i class="fas fa-bars"></i><span></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="nav navbar-nav ms-auto">
+                        <li class="nav-item ">
+                            <a asp-action="Logout" asp-controller="Auth" class="btn btn-danger "><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <!-- end of navbar navigation -->
+            <div class="content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    <script src="~/assets/vendor/jquery/jquery.min.js"></script>
+    <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/vendor/datatables/datatables.min.js"></script>
+    <script src="~/assets/js/initiate-datatables.js"></script>
+    <script src="~/assets/js/script.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>
