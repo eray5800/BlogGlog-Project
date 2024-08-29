@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace DAL.Models
 {
@@ -13,8 +8,8 @@ namespace DAL.Models
         public Guid BlogLikeID { get; set; }
 
         public Blog Blog { get; set; }
-       
 
-        public AppUser User {  get; set; }
+
+        public AppUser User { get; set; }
     }
 }

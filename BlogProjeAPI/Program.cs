@@ -1,23 +1,21 @@
 using BAL;
+using BAL.ElasticSearch.Client;
+
 using DAL.Context;
 using DAL.Models;
 using GenericRepoAndUnitOfWork.Core.IConfiguration;
 using GenericRepoAndUnitOfWork.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-// Path to the BAL emailsettings.json
-
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(x =>
 {
@@ -31,20 +29,20 @@ builder.Services.AddSwaggerGen(x =>
         Scheme = "Bearer"
     });
 
-    x.AddSecurityRequirement(new OpenApiSecurityRequirement {
+    x.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        new OpenApiSecurityScheme
         {
-            Reference = new OpenApiReference
+            new OpenApiSecurityScheme
             {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-            }
-        },
-        Array.Empty<string>()
-    }
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
-
 });
 
 builder.Services.AddDbContext<AppIdentityDBContext>(options =>
@@ -82,6 +80,20 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+
+
+
+builder.Services.AddSingleton<ElasticClient>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    return new ElasticClient(configuration);
+});
+
+builder.Services.AddScoped<ElasticSearchService>();
+
+
+// Configure the HTTP request pipeline.
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -95,11 +107,10 @@ using (var scope = app.Services.CreateScope())
     string adminEmail = config["AdminUser:Email"];
     string adminPassword = config["AdminUser:Password"];
 
- 
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
     if (adminUser == null)
     {
-        var newUser = new AppUser { UserName = "adminUser", Email = adminEmail,EmailConfirmed= true,IsActive=true };
+        var newUser = new AppUser { UserName = "adminUser", Email = adminEmail, EmailConfirmed = true, IsActive = true };
         var createResult = await userManager.CreateAsync(newUser, adminPassword);
         if (createResult.Succeeded)
         {

@@ -102,11 +102,6 @@ namespace BlogProjeMVC.Controllers.UserOnly
         [HttpGet("{blogID}")]
         public async Task<IActionResult> Detail(Guid blogID)
         {
-            if (!IsUserInRole("Admin") && !IsUserInRole("Writer"))
-            {
-                return Unauthorized();
-            }
-
             string fullPath = GetFullPath(blogBasePath, $"GetBlogByID/{blogID}");
             var blog = await _httpClient.GetFromJsonAsync<Blog>(fullPath);
             ViewBag.BlogImageBasePath = "https://localhost:7181/api/Blog/GetImage/";

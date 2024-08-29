@@ -1,5 +1,4 @@
-﻿using BAL;
-using DAL.Models;
+﻿using DAL.Models;
 using DAL.Models.DTO.Blog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
