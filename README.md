@@ -1,1 +1,1 @@
-# BlogProjeMVC
+# BlogProject
