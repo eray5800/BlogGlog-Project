@@ -9,6 +9,9 @@ namespace GenericRepoAndUnitOfWork.Core.IRepository
         Task<T> GetByIDAsync(Guid id);
 
         Task<bool> AddAsync(TDTO entity);
+        Task<bool> AddAsync(T entity);
+        Task<bool> AddAllAsync(IEnumerable<T> entities);
+        Task<bool> DeleteAllAsync(Expression<Func<T, bool>> filter);
 
         Task<bool> UpdateAsync(Guid id, TDTO entity);
         Task<bool> DeleteAsync(Guid id);

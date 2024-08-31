@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace DAL.Models
 {
@@ -12,9 +11,8 @@ namespace DAL.Models
         public Category Category { get; set; }
         [AllowNull]
         public IEnumerable<BlogTag>? BlogTags { get; set; }
-
-
-        public string? BlogImage { get; set; }
+        [AllowNull]
+        public List<BlogImage>? BlogImages { get; set; }
     }
 
 }

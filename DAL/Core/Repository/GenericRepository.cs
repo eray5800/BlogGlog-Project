@@ -56,20 +56,61 @@ namespace GenericRepoAndUnitOfWork.Core.Repository
             return await dbSet.Where(filter).ToListAsync();
         }
 
+        public virtual async Task<bool> AddAllAsync(IEnumerable<T> entities)
+        {
+            try
+            {
+                await dbSet.AddRangeAsync(entities);
+                return true ;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            
+        }
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
+            
             return await dbSet.ToListAsync();
         }
+
+        
 
         public virtual async Task<T> GetByIDAsync(Guid id)
         {
             return await dbSet.FindAsync(id);
         }
 
+        public virtual async Task<bool> DeleteAllAsync(Expression<Func<T, bool>> filter)
+        {
+            try
+            {
+                var entities = await dbSet.Where(filter).ToListAsync();
+                if (entities == null || !entities.Any())
+                {
+                    return false;
+                }
+
+                dbSet.RemoveRange(entities);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error deleting entities.");
+                return false;
+            }
+        }
+
+        public virtual async Task<bool> AddAsync(T entity)
+        {
+            await dbSet.AddAsync(entity);
+            return true;
+        }
+
         public virtual Task<bool> UpdateAsync(Guid id, TDTO entity)
         {
             throw new NotImplementedException();
         }
-
     }
 }

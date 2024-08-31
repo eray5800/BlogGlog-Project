@@ -4,8 +4,7 @@ using GenericRepoAndUnitOfWork.Core.IRepository;
 
 namespace DAL.Core.IRepository
 {
-    public interface IBlogTagRepository : IGenericRepository<BlogTag, BlogTagDTO>
+    public interface IBlogImageRepository : IGenericRepository<BlogImage, BlogImageDTO>
     {
-        Task<bool> RemoveAllTagsByBlogIDAsync(Guid blogID);
     }
 }

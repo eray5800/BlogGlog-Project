@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Storage\Images\2370e940-a037-4e81-bc9d-27bd95116eb8..jpg" />
+    <None Remove="Storage\Images\45e9e2d6-9633-468a-bbe0-26f421fc710d..png" />
+    <None Remove="Storage\Images\55b28e75-b1fb-4d92-926b-570f06781772..png" />
+    <None Remove="Storage\Images\7438d6f1-7391-41af-9d69-a37658c44d2b..png" />
+    <None Remove="Storage\Images\ae53399d-c19f-4819-98c3-a4a2374372f7..png" />
+    <None Remove="Storage\Images\b2112a11-eedf-4dfd-abde-9a3bfbde3d5a..png" />
+    <None Remove="Storage\Images\e7f9059f-a788-4424-9d4c-b8cc3baab5c4..jpg" />
+    <None Remove="Storage\Images\e996a57f-e7c5-4440-ad28-1bd8ba92ab58..jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />

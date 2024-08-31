@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalMig : Migration
+    public partial class firstMig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -224,7 +224,6 @@ namespace DAL.Migrations
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CategoryID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BlogImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Created_At = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Updated_At = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -242,6 +241,25 @@ namespace DAL.Migrations
                         column: x => x.CategoryID,
                         principalTable: "Categories",
                         principalColumn: "CategoryID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BlogImages",
+                columns: table => new
+                {
+                    BlogImageID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BlogImageName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BlogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlogImages", x => x.BlogImageID);
+                    table.ForeignKey(
+                        name: "FK_BlogImages_Blogs_BlogId",
+                        column: x => x.BlogId,
+                        principalTable: "Blogs",
+                        principalColumn: "BlogId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -395,6 +413,11 @@ namespace DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BlogImages_BlogId",
+                table: "BlogImages",
+                column: "BlogId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BlogLikes_BlogId",
                 table: "BlogLikes",
                 column: "BlogId");
@@ -467,6 +490,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "BlogImages");
 
             migrationBuilder.DropTable(
                 name: "BlogLikes");

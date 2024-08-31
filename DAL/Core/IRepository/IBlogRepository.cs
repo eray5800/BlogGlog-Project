@@ -1,20 +1,17 @@
 ﻿using DAL.Models;
-using DAL.Models.DTO.Blog;
+using DAL.Models.DTO.BlogDTO;
 using GenericRepoAndUnitOfWork.Core.IRepository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAL.Core.IRepository
 {
-    public interface IBlogRepository : IGenericRepository<Blog,BlogDTO>
+    public interface IBlogRepository : IGenericRepository<Blog, BlogDTO>
     {
 
-        Task<Blog> AddAsync(BlogDTO blogDto, Category category,AppUser user);
+        Task<Blog> AddAsync(BlogDTO blogDto, Category category, AppUser user);
 
-        Task<bool> UpdateAsync(Guid blogID, BlogDTO blogDto, Category category);
+        Task<Blog> UpdateAsync(Guid blogID, BlogDTO blogDto, Category category);
+
+        
         Task<IEnumerable<Blog>> SearchAsync(string text);
         Task<IEnumerable<Blog>> SearchBlogCategoryAsync(string Text);
 

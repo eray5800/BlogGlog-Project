@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppIdentityDBContext))]
-    [Migration("20240829161724_FinalMig")]
-    partial class FinalMig
+    [Migration("20240831132931_firstMig")]
+    partial class firstMig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -110,9 +110,6 @@ namespace DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("BlogImage")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("BlogTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -143,6 +140,26 @@ namespace DAL.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Blogs");
+                });
+
+            modelBuilder.Entity("DAL.Models.BlogImage", b =>
+                {
+                    b.Property<Guid>("BlogImageID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlogId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BlogImageName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("BlogImageID");
+
+                    b.HasIndex("BlogId");
+
+                    b.ToTable("BlogImages");
                 });
 
             modelBuilder.Entity("DAL.Models.BlogLike", b =>
@@ -495,6 +512,17 @@ namespace DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DAL.Models.BlogImage", b =>
+                {
+                    b.HasOne("DAL.Models.Blog", "Blog")
+                        .WithMany("BlogImages")
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Blog");
+                });
+
             modelBuilder.Entity("DAL.Models.BlogLike", b =>
                 {
                     b.HasOne("DAL.Models.Blog", "Blog")
@@ -641,6 +669,8 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Models.Blog", b =>
                 {
+                    b.Navigation("BlogImages");
+
                     b.Navigation("BlogTags");
                 });
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DAL.Models.DTO.Blog
+﻿namespace DAL.Models.DTO.BlogDTO
 {
     public class BlogDTO : Base
     {
@@ -9,13 +7,9 @@ namespace DAL.Models.DTO.Blog
         public string BlogTags { get; set; }
 
         public string Content { get; set; }
-
-        public CategoryDTO? Category { get; set; }
         public Guid SelectedCategoryId { get; set; }
+        public List<BlogImageDTO>? BlogImages { get; set; } = new List<BlogImageDTO>();
 
-        public string? BlogImage { get; set; }
-
-        public string? BlogImageExtansion { get; set; }
 
 
     }

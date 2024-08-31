@@ -1,5 +1,5 @@
 ﻿using DAL.Models;
-using DAL.Models.DTO.Blog;
+using DAL.Models.DTO.BlogDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +12,7 @@ namespace BlogProjeAPI.Controllers.UserOnly
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles ="Admin,Writer")]
+    [Authorize(Roles = "Admin,Writer")]
     public class BlogController : ControllerBase
     {
         private readonly BlogService _blogService;
@@ -30,7 +30,7 @@ namespace BlogProjeAPI.Controllers.UserOnly
         [AllowAnonymous]
         public async Task<IActionResult> GetAllBlogs()
         {
-            var blogs = await _blogService.GetAllBlogsAsync();
+            IEnumerable<Blog> blogs = await _blogService.GetAllBlogsAsync();
             return Ok(blogs);
         }
 
@@ -48,31 +48,29 @@ namespace BlogProjeAPI.Controllers.UserOnly
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Search([FromQuery] string Text)
+        public async Task<IActionResult> Search([FromQuery] string text)
         {
-            var blogs = await _blogService.Search(Text);
-            
-            if (blogs == null)
+            var blogs = await _blogService.Search(text);
+            if (blogs == null || !blogs.Any())
             {
-                return NotFound("Blog not found.");
+                return NotFound("No blogs found.");
             }
             return Ok(blogs);
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> CategorySearch([FromQuery] string Text)
+        public async Task<IActionResult> CategorySearch([FromQuery] string text)
         {
-            var blogs = await _blogService.SearchBlogCategoryAsync(Text);
-            if (blogs == null)
+            var blogs = await _blogService.SearchBlogCategoryAsync(text);
+            if (blogs == null || !blogs.Any())
             {
-                return NotFound("Blog not found.");
+                return NotFound("No blogs found.");
             }
             return Ok(blogs);
         }
 
         [HttpPost]
-        
         public async Task<IActionResult> AddBlog([FromBody] BlogDTO blogDto)
         {
             if (!ModelState.IsValid)
@@ -81,8 +79,25 @@ namespace BlogProjeAPI.Controllers.UserOnly
                 return BadRequest(new { Errors = errors });
             }
 
-            // Token'dan kullanıcıyı al
+            // Validate image files count and size
+            if (blogDto.BlogImages.Count > 5)
+            {
+                return BadRequest("You can upload a maximum of 5 images.");
+            }
+
+            const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
+            foreach (var image in blogDto.BlogImages)
+            {
+                var imageBytes = Convert.FromBase64String(image.Base64Image);
+                if (imageBytes.Length > maxFileSize)
+                {
+                    return BadRequest($"Each image must be smaller than 3 MB. An image is too large.");
+                }
+            }
+
             var userId = GetUserIdFromToken();
+            System.Diagnostics.Debug.WriteLine($"User ID from token: {userId}");
+
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("Invalid token");
@@ -94,21 +109,15 @@ namespace BlogProjeAPI.Controllers.UserOnly
                 return Unauthorized("User not found");
             }
 
-            if (!string.IsNullOrEmpty(blogDto.BlogImage))
+            // Save images to storage
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
+            foreach (var image in blogDto.BlogImages)
             {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                byte[] imageBytes = Convert.FromBase64String(blogDto.BlogImage);
-
-                string fileName = Guid.NewGuid().ToString() + blogDto.BlogImageExtansion; // Uygun uzantıyı belirleyin
-                string filePath = Path.Combine(uploadsFolder, fileName);
-
+                var imageBytes = Convert.FromBase64String(image.Base64Image);
+                var fileName = string.Concat(Guid.NewGuid(), image.BlogImageExtension);
+                var filePath = Path.Combine(imageDirectory, fileName);
+                image.BlogImageName = fileName;
                 await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
-                blogDto.BlogImage = fileName; // DTO'ya dosya adını ekleyin
             }
 
             var result = await _blogService.CreateBlogAsync(blogDto, user);
@@ -117,8 +126,79 @@ namespace BlogProjeAPI.Controllers.UserOnly
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error adding the blog.");
             }
 
+            System.Diagnostics.Debug.WriteLine("Blog added successfully.");
             return Ok("Blog added successfully.");
         }
+
+
+        [HttpPut("{blogID}")]
+        public async Task<IActionResult> UpdateBlog([FromRoute] Guid blogID, [FromBody] BlogDTO blogDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { Errors = errors });
+            }
+
+            var existingBlog = await _blogService.GetBlogByIDAsync(blogID);
+            if (existingBlog == null)
+            {
+                return NotFound("Blog not found.");
+            }
+
+            var userId = GetUserIdFromToken();
+            if (existingBlog.User.Id != userId)
+            {
+                return Unauthorized("You are not authorized to update this blog.");
+            }
+
+            // Validate image files count and size
+            if (blogDto.BlogImages.Count > 5)
+            {
+                return BadRequest("You can upload a maximum of 5 images.");
+            }
+
+            const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
+            foreach (var image in blogDto.BlogImages)
+            {
+                var imageBytes = Convert.FromBase64String(image.Base64Image);
+                if (imageBytes.Length > maxFileSize)
+                {
+                    return BadRequest($"Each image must be smaller than 3 MB. An image is too large.");
+                }
+            }
+
+            // Delete old images from storage
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
+            foreach (var image in existingBlog.BlogImages)
+            {
+                var filePath = Path.Combine(imageDirectory, image.BlogImageName);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+
+            // Save new images to storage
+            foreach (var image in blogDto.BlogImages)
+            {
+                var imageBytes = Convert.FromBase64String(image.Base64Image);
+                var fileName = $"{Guid.NewGuid()}.{image.BlogImageExtension}";
+                var filePath = Path.Combine(imageDirectory, fileName);
+                image.BlogImageName = fileName;
+                await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+            }
+
+            var result = await _blogService.UpdateBlogAsync(blogID, blogDto);
+            if (!result)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating the blog.");
+            }
+
+            return Ok("Blog updated successfully.");
+        }
+
+
 
         [HttpGet("{fileName}")]
         [AllowAnonymous]
@@ -144,6 +224,42 @@ namespace BlogProjeAPI.Controllers.UserOnly
             return File(fileBytes, contentType);
         }
 
+        [HttpDelete("{blogID}")]
+        public async Task<IActionResult> DeleteBlog(Guid blogID)
+        {
+            var blog = await _blogService.GetBlogByIDAsync(blogID);
+            if (blog == null)
+            {
+                return NotFound("Blog not found.");
+            }
+
+            var userId = GetUserIdFromToken();
+            if (blog.User.Id != userId)
+            {
+                return Unauthorized("You are not authorized to delete this blog.");
+            }
+
+            // Delete images from storage
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
+            foreach (var image in blog.BlogImages)
+            {
+                var filePath = Path.Combine(imageDirectory, image.BlogImageName);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+
+            // Delete the blog entry
+            var result = await _blogService.DeleteBlogAsync(blogID);
+            if (!result)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting the blog.");
+            }
+
+            return Ok("Blog and associated images deleted successfully.");
+        }
+
 
         private string GetUserIdFromToken()
         {
@@ -164,102 +280,12 @@ namespace BlogProjeAPI.Controllers.UserOnly
                 };
 
                 var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
-                return principal.FindFirst(ClaimTypes.NameIdentifier)?.Value; // Kullanıcı ID'sini döndür
+                return principal.FindFirst(ClaimTypes.NameIdentifier)?.Value; // Return user ID
             }
             catch
             {
                 return null;
             }
-        }
-
-        [HttpPut("{blogID}")]
-        public async Task<IActionResult> UpdateBlog([FromRoute] Guid blogID, [FromBody] BlogDTO blogDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            // Blog'un mevcut durumunu veritabanından al
-            var existingBlog = await _blogService.GetBlogByIDAsync(blogID);
-            if (existingBlog == null)
-            {
-                return NotFound("Blog not found.");
-            }
-
-            // Token'dan kullanıcıyı al ve blogun sahibinin aynı kullanıcı olup olmadığını kontrol et
-            var userId = GetUserIdFromToken();
-            if (existingBlog.User.Id != userId)
-            {
-                return Unauthorized("You are not authorized to update this blog.");
-            }
-
-            // Yeni bir resim yüklendiyse önce eski resmi sil
-            if (!string.IsNullOrEmpty(blogDto.BlogImage) && !string.IsNullOrEmpty(existingBlog.BlogImage))
-            {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
-                string existingFilePath = Path.Combine(uploadsFolder, existingBlog.BlogImage);
-                if (System.IO.File.Exists(existingFilePath))
-                {
-                    System.IO.File.Delete(existingFilePath);
-                }
-
-                byte[] imageBytes = Convert.FromBase64String(blogDto.BlogImage);
-                string fileName = Guid.NewGuid().ToString() + blogDto.BlogImageExtansion;
-                string filePath = Path.Combine(uploadsFolder, fileName);
-
-                await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
-                blogDto.BlogImage = fileName; // DTO'ya dosya adını ekleyin
-            }
-
-            // Blog güncelleme işlemini gerçekleştir
-            var result = await _blogService.UpdateBlogAsync(blogID, blogDto);
-
-            if (!result)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating the blog.");
-            }
-
-            return Ok("Blog updated successfully.");
-        }
-
-
-        [HttpDelete("{blogID}")]
-        public async Task<IActionResult> DeleteBlog(Guid blogID)
-        {
-            // Blog'u veritabanından al
-            var blog = await _blogService.GetBlogByIDAsync(blogID);
-            string userID = GetUserIdFromToken();
-            if(blog.User.Id != userID)
-            {
-                return BadRequest("This blog is not yours ");
-            }
-            if (blog == null)
-            {
-                return NotFound("Blog not found.");
-            }
-
-            // Blog'un görselini sil
-            if (!string.IsNullOrEmpty(blog.BlogImage))
-            {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
-                string filePath = Path.Combine(uploadsFolder, blog.BlogImage);
-
-                if (System.IO.File.Exists(filePath))
-                {
-                    System.IO.File.Delete(filePath);
-                }
-            }
-
-            // Blog'u veritabanından sil
-            var result = await _blogService.DeleteBlogAsync(blogID);
-
-            if (!result)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting the blog.");
-            }
-
-            return Ok("Blog and associated image deleted successfully.");
         }
     }
 }

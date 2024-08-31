@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace DAL.Models
 {
@@ -17,7 +11,7 @@ namespace DAL.Models
         public override string UserName { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
-        
+
         [EmailAddress(ErrorMessage = "Invalid Email Address.")]
         public override string Email { get; set; }
 

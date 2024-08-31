@@ -1,7 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
-namespace DAL.Models
+
+namespace DAL.Models.DTO.BlogDTO
 {
     public class BlogTagDTO : Base
     {

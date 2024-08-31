@@ -2,12 +2,9 @@
 using DAL.Core.IRepository;
 using DAL.Models;
 using DAL.Models.DTO;
-using DAL.Models.DTO.Blog;
-using GenericRepoAndUnitOfWork.Core.IRepository;
 using GenericRepoAndUnitOfWork.Core.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 
 namespace DAL.Core.Repository
 {
@@ -17,7 +14,7 @@ namespace DAL.Core.Repository
         {
         }
 
-        public async Task<bool> AddAsync(WriterRequestDTO requestDTO,AppUser user)
+        public async Task<bool> AddAsync(WriterRequestDTO requestDTO, AppUser user)
         {
 
             WriterRequest wr = new WriterRequest()
@@ -27,7 +24,7 @@ namespace DAL.Core.Repository
                 User = user,
                 RequestDate = DateTime.Now,
             };
-           
+
 
             await dbSet.AddAsync(wr);
             return true;

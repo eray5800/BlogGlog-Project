@@ -20,6 +20,8 @@ namespace DAL.Context
 
         DbSet<Blog> Blogs { get; set; }
         DbSet<BlogLike> BlogLikes { get; set; }
+
+        DbSet<BlogImage> BlogImages { get; set; }
         DbSet<BlogTag> BlogTags { get; set; }
         DbSet<BlogView> BlogViews { get; set; }
         DbSet<Category> Categories {  get; set; }
@@ -28,6 +30,8 @@ namespace DAL.Context
         DbSet<CommentLike> CommentLikes { get; set; }
 
         DbSet<WriterRequest> WriterRequests { get; set; }
+
+       
 
 
 

@@ -1,12 +1,11 @@
 ﻿using DAL.Models;
-using DAL.Models.DTO.Blog;
+using DAL.Models.DTO.BlogDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Net.Http.Headers;
 using System.Text;
 
-namespace BlogProjeMVC.Controllers.UserOnly
+namespace BlogProjeMVC.Controllers.WriterOnly
 {
     [Route("/[controller]/[action]")]
 
@@ -44,7 +43,7 @@ namespace BlogProjeMVC.Controllers.UserOnly
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(BlogDTO blogDto, IFormFile imageFile)
+        public async Task<IActionResult> Create(BlogDTO blogDto, List<IFormFile> imageFiles)
         {
             if (!IsUserInRole("Admin") && !IsUserInRole("Writer"))
             {
@@ -53,35 +52,44 @@ namespace BlogProjeMVC.Controllers.UserOnly
 
             if (!ModelState.IsValid)
             {
-                string fullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
-                var categories1 = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(fullPath);
-                ViewBag.Categories = categories1;
+                await LoadCategoriesAsync();
                 return View(blogDto);
             }
 
-            string imageExtansion = Path.GetExtension(imageFile.FileName).ToLower();
-            if (imageExtansion != ".png" && imageExtansion != ".jpeg" && imageExtansion != ".jpg")
+            // Ensure at least one image is uploaded
+            if (imageFiles == null || !imageFiles.Any())
             {
-                string fullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
-                var categories1 = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(fullPath);
-                ViewBag.Categories = categories1;
-                ModelState.AddModelError("", "Please choose a correct image file");
+                await LoadCategoriesAsync();
+                ModelState.AddModelError("", "You must upload at least one image.");
                 return View(blogDto);
             }
 
-            if (imageFile != null && imageFile.Length > 0)
+            // Validate image files count and size
+            if (imageFiles.Count > 5)
             {
-                using (var memoryStream = new MemoryStream())
+                await LoadCategoriesAsync();
+                ModelState.AddModelError("", "You can upload a maximum of 5 images.");
+                return View(blogDto);
+            }
+
+            const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
+            foreach (var file in imageFiles)
+            {
+                if (file.Length > maxFileSize)
                 {
-                    await imageFile.CopyToAsync(memoryStream);
-                    byte[] imageBytes = memoryStream.ToArray();
-
-                    string base64String = Convert.ToBase64String(imageBytes);
-                    blogDto.BlogImage = base64String;
-                    // Resmi base64 string olarak DTO'ya ekliyor burada geçici olarak tutulacak
+                    await LoadCategoriesAsync();
+                    ModelState.AddModelError("", $"Each image must be smaller than 3 MB. '{file.FileName}' is too large.");
+                    return View(blogDto);
                 }
             }
-            blogDto.BlogImageExtansion = imageExtansion;
+
+            if (!await ProcessImagesAsync(blogDto, imageFiles))
+            {
+                await LoadCategoriesAsync();
+                ModelState.AddModelError("", "Please choose correct image files.");
+                return View(blogDto);
+            }
+
             string blogFullPath = GetFullPath(blogBasePath, "AddBlog");
             var response = await _httpClient.PostAsJsonAsync(blogFullPath, blogDto);
 
@@ -91,13 +99,14 @@ namespace BlogProjeMVC.Controllers.UserOnly
             }
             else
             {
-                string fullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
-                var categories1 = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(fullPath);
-                ViewBag.Categories = categories1;
+                await LoadCategoriesAsync();
                 ModelState.AddModelError("", "An error occurred while creating the blog.");
                 return View(blogDto);
             }
         }
+
+
+
 
         [HttpGet("{blogID}")]
         public async Task<IActionResult> Detail(Guid blogID)
@@ -145,7 +154,7 @@ namespace BlogProjeMVC.Controllers.UserOnly
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update(BlogDTO blogDto, IFormFile imageFile)
+        public async Task<IActionResult> Update(BlogDTO blogDto, List<IFormFile> imageFiles)
         {
             if (!IsUserInRole("Admin") && !IsUserInRole("Writer"))
             {
@@ -154,49 +163,44 @@ namespace BlogProjeMVC.Controllers.UserOnly
 
             if (!ModelState.IsValid)
             {
-                // Kategorileri yeniden al
-                string categoryFullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
-                var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(categoryFullPath);
-                ViewBag.Categories = categories;
+                await LoadCategoriesAsync();
                 return View(blogDto);
             }
 
-            // Resim dosyası var mı?
-            if (imageFile != null && imageFile.Length > 0)
+            // Ensure at least one image is uploaded
+            if (imageFiles == null || !imageFiles.Any())
             {
-                string imageExtension = Path.GetExtension(imageFile.FileName).ToLower();
-                if (imageExtension != ".png" && imageExtension != ".jpeg" && imageExtension != ".jpg")
-                {
-                    ModelState.AddModelError("", "Please choose a correct image file");
-
-                    string categoryFullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
-                    var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(categoryFullPath);
-                    ViewBag.Categories = categories;
-                    return View(blogDto);
-                }
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await imageFile.CopyToAsync(memoryStream);
-                    byte[] imageBytes = memoryStream.ToArray();
-                    blogDto.BlogImage = Convert.ToBase64String(imageBytes);
-                    blogDto.BlogImageExtansion = imageExtension;
-                }
+                await LoadCategoriesAsync();
+                ModelState.AddModelError("", "You must upload at least one image.");
+                return View(blogDto);
             }
-            else
+
+            // Validate image files count and size
+            if (imageFiles.Count > 5)
             {
-                // Resim dosyası yoksa mevcut resmi koru
-                if (string.IsNullOrEmpty(blogDto.BlogImage))
+                await LoadCategoriesAsync();
+                ModelState.AddModelError("", "You can upload a maximum of 5 images.");
+                return View(blogDto);
+            }
+
+            const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
+            foreach (var file in imageFiles)
+            {
+                if (file.Length > maxFileSize)
                 {
-                    ModelState.AddModelError("", "Image file is required.");
-                    string categoryFullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
-                    var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(categoryFullPath);
-                    ViewBag.Categories = categories;
+                    await LoadCategoriesAsync();
+                    ModelState.AddModelError("", $"Each image must be smaller than 3 MB. '{file.FileName}' is too large.");
                     return View(blogDto);
                 }
             }
 
-            // Blog'u güncelle
+            if (!await ProcessImagesAsync(blogDto, imageFiles))
+            {
+                await LoadCategoriesAsync();
+                ModelState.AddModelError("", "Please choose correct image files.");
+                return View(blogDto);
+            }
+
             string blogFullPath = GetFullPath(blogBasePath, $"UpdateBlog/{blogDto.BlogID}");
             var response = await _httpClient.PutAsJsonAsync(blogFullPath, blogDto);
 
@@ -206,15 +210,50 @@ namespace BlogProjeMVC.Controllers.UserOnly
             }
             else
             {
-                // Hata mesajını al
                 var errorMessage = await response.Content.ReadAsStringAsync();
                 ModelState.AddModelError("", $"An error occurred while updating the blog: {errorMessage}");
 
-                string categoryFullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
-                var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(categoryFullPath);
-                ViewBag.Categories = categories;
+                await LoadCategoriesAsync();
                 return View(blogDto);
             }
+        }
+
+
+
+        private async Task<bool> ProcessImagesAsync(BlogDTO blogDto, List<IFormFile> imageFiles)
+        {
+            foreach (var imageFile in imageFiles)
+            {
+                if (imageFile.Length > 0)
+                {
+                    string imageExtension = Path.GetExtension(imageFile.FileName).ToLower();
+                    if (imageExtension != ".png" && imageExtension != ".jpeg" && imageExtension != ".jpg")
+                    {
+                        return false; // Invalid image file
+                    }
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await imageFile.CopyToAsync(memoryStream);
+                        byte[] imageBytes = memoryStream.ToArray();
+                        blogDto.BlogImages.Add(new BlogImageDTO
+                        {
+                            BlogImageName = Path.GetFileNameWithoutExtension(imageFile.FileName),
+                            BlogImageExtension = imageExtension,
+                            Base64Image = Convert.ToBase64String(imageBytes)
+                        });
+                    }
+                }
+            }
+            return true; // Successfully processed all images
+        }
+
+
+        private async Task LoadCategoriesAsync()
+        {
+            string fullPath = GetFullPath(categoryBasePath, "GetAllActiveCategories");
+            var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(fullPath);
+            ViewBag.Categories = categories;
         }
 
         public async Task<IActionResult> Search([FromQuery] string textSearch)

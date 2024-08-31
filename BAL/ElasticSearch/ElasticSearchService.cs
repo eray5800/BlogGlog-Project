@@ -1,12 +1,7 @@
-﻿using Elastic.Clients.Elasticsearch;
-using Elastic.Clients.Elasticsearch.QueryDsl;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using BAL.ElasticSearch.Client;
 using DAL.Models;
-using DAL.Models.DTO.Blog;
-using BAL.ElasticSearch.Client;
-using BAL.ElasticSearch;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 
 public class ElasticSearchService
 {
@@ -42,7 +37,7 @@ public class ElasticSearchService
         {
 
             // Ensure BlogDTO is mapped correctly to Blog if needed
-            var updateRequest = new UpdateRequest<Blog,Blog>("blogs", requestBlog.BlogId)
+            var updateRequest = new UpdateRequest<Blog, Blog>("blogs", requestBlog.BlogId)
             {
                 Doc = requestBlog
             };
@@ -61,7 +56,7 @@ public class ElasticSearchService
     {
         try
         {
-            var deleteResponse = await _elasticClient.DeleteAsync<Blog>("blogs",blogId.ToString());
+            var deleteResponse = await _elasticClient.DeleteAsync<Blog>("blogs", blogId.ToString());
             return deleteResponse.IsValidResponse;
         }
         catch (Exception ex)

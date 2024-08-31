@@ -1,4 +1,4 @@
-﻿@using DAL.Models.DTO.Blog;
+﻿@using DAL.Models.DTO.BlogDTO;
 @model BlogDTO
 
 @{
@@ -39,7 +39,7 @@
 
         <div class="mb-3">
             <label class="form-label">Image</label>
-            <input type="file" accept=".jpg, .jpeg, .png" name="ImageFile" class="form-control" />
+            <input type="file" multiple accept=".jpg, .jpeg, .png" name="imageFiles" class="form-control" />
         </div>
         <button type="submit" class="btn btn-primary">Update</button>
     </form>
