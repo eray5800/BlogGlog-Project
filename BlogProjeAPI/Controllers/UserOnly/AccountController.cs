@@ -1,4 +1,5 @@
 ﻿using BAL;
+using BAL.BlogServices;
 using BAL.EmailContents;
 using DAL.Models;
 using DAL.Models.DTO.Account;
@@ -23,7 +24,7 @@ namespace BlogProjeAPI.Controllers.UserOnly
         private readonly BlogService _blogService;
         private readonly RoleService _roleService;
 
-        public AccountController(UserManager<AppUser> userManager, IConfiguration configuration, EmailService emailService,BlogService blogService,RoleService roleService)
+        public AccountController(UserManager<AppUser> userManager, IConfiguration configuration, EmailService emailService, BlogService blogService, RoleService roleService)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -49,12 +50,13 @@ namespace BlogProjeAPI.Controllers.UserOnly
                 return NotFound("User not found.");
             }
 
-            UserBlogs userWithBlogs = new UserBlogs            {
+            UserBlogs userWithBlogs = new UserBlogs
+            {
                 User = user
             };
 
             // Include blogs if the user is an Admin or Writer
-            if (await _roleService.CheckUserRole(userId,"Admin") || await _roleService.CheckUserRole(userId, "Writer"))
+            if (await _roleService.CheckUserRole(userId, "Admin") || await _roleService.CheckUserRole(userId, "Writer"))
             {
                 IEnumerable<Blog> blogs = await _blogService.GetAllUserBlogsAsync(user.Id);
                 userWithBlogs.Blogs = blogs;
@@ -112,7 +114,7 @@ namespace BlogProjeAPI.Controllers.UserOnly
             }
 
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, dto.NewEmail);
-            EmailChangeContent emailChangeContent = new EmailChangeContent(token,user.Email,dto.NewEmail);
+            EmailChangeContent emailChangeContent = new EmailChangeContent(token, user.Email, dto.NewEmail);
             await _emailService.SendEmail(emailChangeContent, user.Email);
 
             return Ok("Email change request sent.");
@@ -152,7 +154,7 @@ namespace BlogProjeAPI.Controllers.UserOnly
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 EmailConfirmationContent EmailConfirmationContent = new EmailConfirmationContent(token, user.Email);
-                await _emailService.SendEmail(EmailConfirmationContent,user.Email);
+                await _emailService.SendEmail(EmailConfirmationContent, user.Email);
                 return Ok(new ApiResponse { Success = true, Message = "Email confirmation sent." });
             }
             catch (Exception ex)

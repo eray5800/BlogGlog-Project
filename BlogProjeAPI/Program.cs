@@ -1,6 +1,7 @@
 using BAL;
+using BAL.BlogServices;
+using BAL.CategoryServices;
 using BAL.ElasticSearch.Client;
-
 using DAL.Context;
 using DAL.Models;
 using GenericRepoAndUnitOfWork.Core.IConfiguration;
@@ -50,7 +51,7 @@ builder.Services.AddDbContext<AppIdentityDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("connectionString"));
 });
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<ICategoryService,CategoryService>();
 builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<WriterRequestService>();
