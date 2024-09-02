@@ -9,9 +9,11 @@ namespace BAL.ElasticSearch
 {
     public interface IElasticSearchService
     {
-        Task IndexBlogAsync(Blog blog); // Create or Update
+        Task<bool> CreateBlogAsync(Blog blog); // Create or Update
         Task<IEnumerable<Blog>> SearchBlogsAsync(string query); // Read
+
+        Task<IEnumerable<Blog>> SearchBlogCategoryAsync(string category);
         Task<bool> UpdateBlogAsync(Blog blog); // Update
-        Task<bool> DeleteBlogAsync(string blogId); // Delete
+        Task<bool> DeleteBlogAsync(Guid blogId);
     }
 }

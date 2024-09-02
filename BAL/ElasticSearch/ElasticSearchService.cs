@@ -1,9 +1,10 @@
-﻿using BAL.ElasticSearch.Client;
+﻿using BAL.ElasticSearch;
+using BAL.ElasticSearch.Client;
 using DAL.Models;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 
-public class ElasticSearchService
+public class ElasticSearchService : IElasticSearchService
 {
     private readonly ElasticsearchClient _elasticClient;
 
@@ -84,12 +85,11 @@ public class ElasticSearchService
                 }
             };
             var response = await _elasticClient.SearchAsync<Blog>(searchRequest);
-            return response.Documents;
+            return response.Documents.Count != 0 ? response.Documents : Enumerable.Empty<Blog>(); ;
         }
         catch (Exception ex)
         {
-            // Use a logging framework instead of Console.WriteLine
-            Console.WriteLine($"Error searching blogs: {ex.Message}");
+
             return new List<Blog>();
         }
     }
@@ -113,7 +113,7 @@ public class ElasticSearchService
             };
 
             var response = await _elasticClient.SearchAsync<Blog>(searchRequest);
-            return response.Documents;
+            return response.Documents.Count != 0 ? response.Documents : Enumerable.Empty<Blog>(); ;
         }
         catch (Exception ex)
         {

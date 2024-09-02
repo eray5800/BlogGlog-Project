@@ -64,10 +64,6 @@ namespace BlogProjeAPI.Controllers.UserOnly
         public async Task<IActionResult> CategorySearch([FromQuery] string text)
         {
             var blogs = await _blogService.SearchBlogCategoryAsync(text);
-            if (blogs == null || !blogs.Any())
-            {
-                return NotFound("No blogs found.");
-            }
             return Ok(blogs);
         }
 

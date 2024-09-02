@@ -1,4 +1,5 @@
-﻿using DAL.Models;
+﻿using BAL.ElasticSearch;
+using DAL.Models;
 using DAL.Models.DTO.BlogDTO;
 using GenericRepoAndUnitOfWork.Core.IConfiguration;
 
@@ -7,9 +8,9 @@ namespace BAL.BlogServices
     public class BlogService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ElasticSearchService _elasticSearchService;
+        private readonly IElasticSearchService _elasticSearchService;
 
-        public BlogService(IUnitOfWork unitOfWork, ElasticSearchService elasticSearchService)
+        public BlogService(IUnitOfWork unitOfWork, IElasticSearchService elasticSearchService)
         {
             _unitOfWork = unitOfWork;
             _elasticSearchService = elasticSearchService;
@@ -192,7 +193,7 @@ namespace BAL.BlogServices
             {
                 return Enumerable.Empty<Blog>();
             }
-
+            var result = await _elasticSearchService.SearchBlogCategoryAsync(text);
             return await _elasticSearchService.SearchBlogCategoryAsync(text);
         }
     }

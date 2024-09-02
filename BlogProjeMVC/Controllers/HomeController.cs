@@ -32,7 +32,6 @@ namespace BlogProjeMVC.Controllers
 
 
             IEnumerable<Blog> blogs;
-
             if (TempData["SearchBlogs"] != null)
             {
                 blogs = JsonConvert.DeserializeObject<IEnumerable<Blog>>(TempData["SearchBlogs"].ToString());

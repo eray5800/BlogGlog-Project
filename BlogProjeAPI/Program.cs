@@ -1,6 +1,7 @@
 using BAL;
 using BAL.BlogServices;
 using BAL.CategoryServices;
+using BAL.ElasticSearch;
 using BAL.ElasticSearch.Client;
 using DAL.Context;
 using DAL.Models;
@@ -91,7 +92,7 @@ builder.Services.AddSingleton<ElasticClient>(sp =>
     return new ElasticClient(configuration);
 });
 
-builder.Services.AddScoped<ElasticSearchService>();
+builder.Services.AddScoped<IElasticSearchService,ElasticSearchService>();
 
 
 // Configure the HTTP request pipeline.
