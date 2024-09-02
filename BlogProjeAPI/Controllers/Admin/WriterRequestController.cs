@@ -1,10 +1,8 @@
-﻿using BAL;
+﻿using BAL.RoleServices;
+using BAL.Writer.WriterRequestServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BlogProjeAPI.Controllers.Admin
 {
@@ -12,10 +10,10 @@ namespace BlogProjeAPI.Controllers.Admin
     [Authorize(Roles = "Admin")]
     public class WriterRequestController : ControllerBase
     {
-        private readonly WriterRequestService _writerRequestService;
-        private readonly RoleService _roleService;
+        private readonly IWriterRequestService _writerRequestService;
+        private readonly IRoleService _roleService;
 
-        public WriterRequestController(WriterRequestService writerRequestService, RoleService roleService)
+        public WriterRequestController(IWriterRequestService writerRequestService, IRoleService roleService)
         {
             _writerRequestService = writerRequestService;
             _roleService = roleService;

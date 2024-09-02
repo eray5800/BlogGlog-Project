@@ -1,9 +1,9 @@
 ﻿using DAL.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace BAL
+namespace BAL.RoleServices
 {
-    public class RoleService
+    public class RoleService : IRoleService
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -51,7 +51,7 @@ namespace BAL
             }
         }
 
-        
+
         public async Task ChangeUserRoleAsync(string userId, string newRoleName)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -67,7 +67,7 @@ namespace BAL
         }
 
 
-        public async Task<bool> CheckUserRole(string userId,string role)
+        public async Task<bool> CheckUserRole(string userId, string role)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)

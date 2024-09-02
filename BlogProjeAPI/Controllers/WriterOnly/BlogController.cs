@@ -9,18 +9,18 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace BlogProjeAPI.Controllers.UserOnly
+namespace BlogProjeAPI.Controllers.WriterOnly
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize(Roles = "Admin,Writer")]
     public class BlogController : ControllerBase
     {
-        private readonly BlogService _blogService;
+        private readonly IBlogService _blogService;
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
 
-        public BlogController(BlogService blogService, UserManager<AppUser> userManager, IConfiguration configuration)
+        public BlogController(IBlogService blogService, UserManager<AppUser> userManager, IConfiguration configuration)
         {
             _blogService = blogService;
             _userManager = userManager;

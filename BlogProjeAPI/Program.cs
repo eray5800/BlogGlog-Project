@@ -1,8 +1,10 @@
-using BAL;
 using BAL.BlogServices;
 using BAL.CategoryServices;
 using BAL.ElasticSearch;
 using BAL.ElasticSearch.Client;
+using BAL.EmailServices;
+using BAL.RoleServices;
+using BAL.Writer.WriterRequestServices;
 using DAL.Context;
 using DAL.Models;
 using GenericRepoAndUnitOfWork.Core.IConfiguration;
@@ -52,16 +54,16 @@ builder.Services.AddDbContext<AppIdentityDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("connectionString"));
 });
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ICategoryService,CategoryService>();
-builder.Services.AddScoped<BlogService>();
-builder.Services.AddScoped<RoleService>();
-builder.Services.AddScoped<WriterRequestService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IWriterRequestService,WriterRequestService>();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<AppIdentityDBContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -92,7 +94,7 @@ builder.Services.AddSingleton<ElasticClient>(sp =>
     return new ElasticClient(configuration);
 });
 
-builder.Services.AddScoped<IElasticSearchService,ElasticSearchService>();
+builder.Services.AddScoped<IElasticSearchService, ElasticSearchService>();
 
 
 // Configure the HTTP request pipeline.

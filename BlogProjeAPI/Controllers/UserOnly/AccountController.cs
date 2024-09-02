@@ -1,6 +1,7 @@
-﻿using BAL;
-using BAL.BlogServices;
-using BAL.EmailContents;
+﻿using BAL.BlogServices;
+using BAL.EmailServices;
+using BAL.EmailServices.EmailContents;
+using BAL.RoleServices;
 using DAL.Models;
 using DAL.Models.DTO.Account;
 using DAL.Models.HelperModels;
@@ -20,11 +21,11 @@ namespace BlogProjeAPI.Controllers.UserOnly
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly EmailService _emailService;
-        private readonly BlogService _blogService;
-        private readonly RoleService _roleService;
+        private readonly IEmailService _emailService;
+        private readonly IBlogService _blogService;
+        private readonly IRoleService _roleService;
 
-        public AccountController(UserManager<AppUser> userManager, IConfiguration configuration, EmailService emailService, BlogService blogService, RoleService roleService)
+        public AccountController(UserManager<AppUser> userManager, IConfiguration configuration, IEmailService emailService, IBlogService blogService, IRoleService roleService)
         {
             _userManager = userManager;
             _configuration = configuration;

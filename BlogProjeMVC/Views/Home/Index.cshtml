@@ -18,46 +18,22 @@
         <div class="col-lg-8">
             <!-- Nested row for blog posts -->
             <div class="row">
-                @for (var i = 0; i < Model.Count(); i += 2)
+                @if(Model.Count() != 0 && Model.First().BlogId != Guid.Empty)
                 {
-                    var blog1 = Model.ElementAt(i);
-                    var blog2 = i + 1 < Model.Count() ? Model.ElementAt(i + 1) : null;
-
-                    <div class="col-lg-6 mb-4">
-                        <div class="card blogcard mb-4">
-                            <div id="carouselBlog1@i" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    @for (var j = 0; j < blog1.BlogImages.Count; j++)
-                                    {
-                                        var image = blog1.BlogImages[j];
-                                        <div class="carousel-item @(j == 0 ? "active" : "")">
-                                            <a asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog1.BlogId">
-                                                <img class="d-block w-100 blogcard-img-top" src="@String.Concat(@ViewBag.BlogImageBasePath, image.BlogImageName)" alt="Blog Image" />
-                                            </a>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                            <div class="card-body blogcard-body">
-                                <div class="small text-muted">@blog1.Created_At.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("en-US"))</div>
-                                <h2 class="card-title h4">@blog1.BlogTitle <a asp-action="CategorySearch" asp-controller="Blog" asp-route-categoryName="@blog1.Category.CategoryName" class="btn btn-dark">@blog1.Category.CategoryName</a></h2>
-                                <p class="card-text">@Html.ShortenContent(blog1.Content, 150)</p>
-                                <a class="btn btn-primary" asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog1.BlogId">Read more →</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if (blog2 != null)
+                    @for (var i = 0; i < Model.Count(); i += 2)
                     {
+                        var blog1 = Model.ElementAt(i);
+                        var blog2 = i + 1 < Model.Count() ? Model.ElementAt(i + 1) : null;
+
                         <div class="col-lg-6 mb-4">
                             <div class="card blogcard mb-4">
-                                <div id="carouselBlog2@i" class="carousel slide" data-bs-ride="carousel">
+                                <div id="carouselBlog1@i" class="carousel slide" data-bs-ride="carousel">
                                     <div class="carousel-inner">
-                                        @for (var k = 0; k < blog2.BlogImages.Count; k++)
+                                        @for (var j = 0; j < blog1.BlogImages.Count; j++)
                                         {
-                                            var image = blog2.BlogImages[k];
-                                            <div class="carousel-item @(k == 0 ? "active" : "")">
-                                                <a asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog2.BlogId">
+                                            var image = blog1.BlogImages[j];
+                                            <div class="carousel-item @(j == 0 ? "active" : "")">
+                                                <a asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog1.BlogId">
                                                     <img class="d-block w-100 blogcard-img-top" src="@String.Concat(@ViewBag.BlogImageBasePath, image.BlogImageName)" alt="Blog Image" />
                                                 </a>
                                             </div>
@@ -65,15 +41,43 @@
                                     </div>
                                 </div>
                                 <div class="card-body blogcard-body">
-                                    <div class="small text-muted">@blog2.Created_At.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("en-US"))</div>
-                                    <h2 class="card-title h4">@blog2.BlogTitle <a asp-action="CategorySearch" asp-controller="Blog" asp-route-categoryName="@blog2.Category.CategoryName" class="btn btn-dark">@blog2.Category.CategoryName</a></h2>
-                                    <p class="card-text">@Html.ShortenContent(blog2.Content, 150)</p>
-                                    <a class="btn btn-primary" asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog2.BlogId">Read more →</a>
+                                    <div class="small text-muted">@blog1.Created_At.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("en-US"))</div>
+                                    <h2 class="card-title h4">@blog1.BlogTitle <a asp-action="CategorySearch" asp-controller="Blog" asp-route-categoryName="@blog1.Category.CategoryName" class="btn btn-dark">@blog1.Category.CategoryName</a></h2>
+                                    <p class="card-text">@Html.ShortenContent(blog1.Content, 150)</p>
+                                    <a class="btn btn-primary" asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog1.BlogId">Read more →</a>
                                 </div>
                             </div>
                         </div>
+
+                        @if (blog2 != null)
+                        {
+                            <div class="col-lg-6 mb-4">
+                                <div class="card blogcard mb-4">
+                                    <div id="carouselBlog2@i" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @for (var k = 0; k < blog2.BlogImages.Count; k++)
+                                            {
+                                                var image = blog2.BlogImages[k];
+                                                <div class="carousel-item @(k == 0 ? "active" : "")">
+                                                    <a asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog2.BlogId">
+                                                        <img class="d-block w-100 blogcard-img-top" src="@String.Concat(@ViewBag.BlogImageBasePath, image.BlogImageName)" alt="Blog Image" />
+                                                    </a>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="card-body blogcard-body">
+                                        <div class="small text-muted">@blog2.Created_At.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("en-US"))</div>
+                                        <h2 class="card-title h4">@blog2.BlogTitle <a asp-action="CategorySearch" asp-controller="Blog" asp-route-categoryName="@blog2.Category.CategoryName" class="btn btn-dark">@blog2.Category.CategoryName</a></h2>
+                                        <p class="card-text">@Html.ShortenContent(blog2.Content, 150)</p>
+                                        <a class="btn btn-primary" asp-action="Detail" asp-controller="Blog" asp-route-blogID="@blog2.BlogId">Read more →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
                 }
+
             </div>
         </div>
 

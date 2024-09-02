@@ -1,14 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BAL.EmailServices.EmailContents;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Net.Mail;
+using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Threading.Tasks;
-using BAL.EmailContents;
+using System.Net.Mail;
 
-namespace BAL
+namespace BAL.EmailServices
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly ILogger<EmailService> _logger;
         private readonly IConfiguration _configuration;

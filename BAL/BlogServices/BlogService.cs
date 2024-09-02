@@ -5,7 +5,7 @@ using GenericRepoAndUnitOfWork.Core.IConfiguration;
 
 namespace BAL.BlogServices
 {
-    public class BlogService
+    public class BlogService : IBlogService 
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IElasticSearchService _elasticSearchService;

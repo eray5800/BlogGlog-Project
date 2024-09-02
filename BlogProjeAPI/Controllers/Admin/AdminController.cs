@@ -1,4 +1,4 @@
-﻿using BAL;
+﻿using BAL.RoleServices;
 using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,10 +15,10 @@ namespace BlogProjeAPI.Controllers
     [Authorize]
     public class AdminController : ControllerBase
     {
-        private readonly RoleService _roleService;
+        private readonly IRoleService _roleService;
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
-        public AdminController(RoleService roleService, UserManager<AppUser> userManager, IConfiguration configuration)
+        public AdminController(IRoleService roleService, UserManager<AppUser> userManager, IConfiguration configuration)
         {
             _roleService = roleService;
             _userManager = userManager;

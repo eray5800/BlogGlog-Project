@@ -1,4 +1,5 @@
-﻿using BAL;
+﻿using BAL.EmailServices;
+using BAL.RoleServices;
 using DAL.Models;
 using DAL.Models.HelperModels;
 using Microsoft.AspNetCore.Authorization;
@@ -17,10 +18,10 @@ public class AuthController : ControllerBase
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IConfiguration _configuration;
-    private readonly EmailService _emailService;
-    private readonly RoleService _roleService;
+    private readonly IEmailService _emailService;
+    private readonly IRoleService _roleService;
 
-    public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration configuration, EmailService emailService, RoleService roleService)
+    public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration configuration, IEmailService emailService, IRoleService roleService)
     {
         _userManager = userManager;
         _signInManager = signInManager;

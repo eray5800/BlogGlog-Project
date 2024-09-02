@@ -1,4 +1,4 @@
-﻿using BAL;
+﻿using BAL.Writer.WriterRequestServices;
 using DAL.Models;
 using DAL.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogProjeAPI.Controllers.WriterOnly
 {
@@ -18,9 +17,9 @@ namespace BlogProjeAPI.Controllers.WriterOnly
     {
         private readonly IConfiguration _configuration;
         private readonly UserManager<AppUser> _userManager;
-        private readonly WriterRequestService _writerRequestService;
+        private readonly IWriterRequestService _writerRequestService;
 
-        public WriterController(IConfiguration configuration, UserManager<AppUser> userManager, WriterRequestService writerRequestService)
+        public WriterController(IConfiguration configuration, UserManager<AppUser> userManager, IWriterRequestService writerRequestService)
         {
             _configuration = configuration;
             _userManager = userManager;

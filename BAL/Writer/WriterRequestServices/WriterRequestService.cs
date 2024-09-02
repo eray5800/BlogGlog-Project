@@ -2,13 +2,10 @@
 using DAL.Models.DTO;
 using GenericRepoAndUnitOfWork.Core.IConfiguration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace BAL
+namespace BAL.Writer.WriterRequestServices
 {
-    public class WriterRequestService
+    public class WriterRequestService : IWriterRequestService
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly ILogger<WriterRequestService> logger;
