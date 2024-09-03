@@ -108,6 +108,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
 
 
 
+
         [HttpGet("{blogID}")]
         public async Task<IActionResult> Detail(Guid blogID)
         {

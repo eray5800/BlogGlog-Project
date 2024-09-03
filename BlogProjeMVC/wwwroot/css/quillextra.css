@@ -1,0 +1,68 @@
+﻿/* Custom font styles for Quill editor */
+.ql-align-right {
+    text-align: right;
+}
+
+.ql-align-center {
+    text-align: center;
+}
+
+.ql-align-left {
+    text-align: left;
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="patrick-hand"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="patrick-hand"]::before {
+    content: 'Patrick Hand';
+    font-family: 'Patrick Hand', sans-serif;
+}
+
+.ql-font-patrick-hand {
+    font-family: 'Patrick Hand', sans-serif;
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="dancing-script"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="dancing-script"]::before {
+    content: 'Dancing Script';
+    font-family: 'Dancing Script', sans-serif;
+}
+
+.ql-font-dancing-script {
+    font-family: 'Dancing Script', sans-serif;
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before {
+    content: 'Arial';
+    font-family: 'Arial', sans-serif;
+}
+
+.ql-font-arial {
+    font-family: 'Arial', sans-serif;
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="courier-new"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="courier-new"]::before {
+    content: 'Courier New';
+    font-family: 'Courier New', monospace;
+}
+
+.ql-font-courier-new {
+    font-family: 'Courier New', monospace;
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="times-new-roman"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="times-new-roman"]::before {
+    content: 'Times New Roman';
+    font-family: 'Times New Roman', serif;
+}
+
+.ql-font-times-new-roman {
+    font-family: 'Times New Roman', serif;
+}
+
+.ql-syntax{
+    background-color: #23241f;
+    color: #f8f8f2;
+    overflow: visible;
+}
