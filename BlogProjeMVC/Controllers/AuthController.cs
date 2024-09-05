@@ -1,17 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using DAL.Models.HelperModels;
-using DAL.Models;
+﻿using DAL.Models.HelperModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 public class AuthController : Controller
 {
-  
+
     private readonly HttpClient _httpClient;
 
     public AuthController(IHttpClientFactory httpClientFactory)
@@ -19,8 +16,8 @@ public class AuthController : Controller
         _httpClient = httpClientFactory.CreateClient("BlogClient");
     }
 
-    private string basePath = "https://localhost:7181/api/Auth/";
-    private string baseAccountPath = "https://localhost:7181/api/Account/";
+    private string basePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Auth/";
+    private string baseAccountPath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Account/";
 
 
     [HttpGet]
@@ -124,7 +121,8 @@ public class AuthController : Controller
     public IActionResult Logout()
     {
         HttpContext.Session.Remove("JWToken");
-        return RedirectToAction("Index","Home");
+        HttpContext.Session.Remove("UserRoles");
+        return RedirectToAction("Index", "Home");
     }
 
     public string GetFullPath(string basePath, string actionName)

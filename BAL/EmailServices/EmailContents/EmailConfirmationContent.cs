@@ -19,6 +19,6 @@ namespace BAL.EmailServices.EmailContents
 
         public string Subject => "Confirm your email";
 
-        public string Body => $"Please confirm your account by clicking this link: <a href='https://localhost:7181/api/Auth/verifyemail?token={Uri.EscapeDataString(Token)}&email={Email}'>link</a>";
+        public string Body => $"Please confirm your account by clicking this link: <a href='https://blogprojeapi20240904220317.azurewebsites.net/api/Auth/verifyemail?token={Uri.EscapeDataString(Token)}&email={Email}'>link</a>";
     }
 }

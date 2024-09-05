@@ -108,6 +108,13 @@ namespace BlogProjeAPI.Controllers.WriterOnly
 
             // Save images to storage
             var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
+
+            // Create directory if it doesn't exist
+            if (!Directory.Exists(imageDirectory))
+            {
+                Directory.CreateDirectory(imageDirectory);
+            }
+
             foreach (var image in blogDto.BlogImages)
             {
                 var imageBytes = Convert.FromBase64String(image.Base64Image);
@@ -126,6 +133,7 @@ namespace BlogProjeAPI.Controllers.WriterOnly
             System.Diagnostics.Debug.WriteLine("Blog added successfully.");
             return Ok("Blog added successfully.");
         }
+
 
 
         [HttpPut("{blogID}")]
@@ -165,8 +173,14 @@ namespace BlogProjeAPI.Controllers.WriterOnly
                 }
             }
 
-            // Delete old images from storage
+            // Save images to storage
             var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
+
+            // Create directory if it doesn't exist
+            if (!Directory.Exists(imageDirectory))
+            {
+                Directory.CreateDirectory(imageDirectory);
+            }
             foreach (var image in existingBlog.BlogImages)
             {
                 var filePath = Path.Combine(imageDirectory, image.BlogImageName);

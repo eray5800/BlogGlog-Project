@@ -1,4 +1,5 @@
-﻿using DAL.Models;
+﻿using BlogProjeMVC.HtmlHelpers;
+using DAL.Models;
 using DAL.Models.DTO.BlogDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,8 +21,9 @@ namespace BlogProjeMVC.Controllers.WriterOnly
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private string categoryBasePath = "https://localhost:7181/api/admin/category/";
-        private string blogBasePath = "https://localhost:7181/api/Blog/";
+        private string categoryBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/category/";
+        private string blogBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/";
+        private string BlogImageBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/GetImage/";
 
         private bool IsUserInRole(string role)
         {
@@ -114,8 +116,9 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         {
             string fullPath = GetFullPath(blogBasePath, $"GetBlogByID/{blogID}");
             var blog = await _httpClient.GetFromJsonAsync<Blog>(fullPath);
-            ViewBag.BlogImageBasePath = "https://localhost:7181/api/Blog/GetImage/";
+            ViewBag.BlogImageBasePath = BlogImageBasePath;
 
+            blog.Content = HtmlSanitizer.HtmlEncodeScriptTags(blog.Content);
             return View(blog);
         }
 

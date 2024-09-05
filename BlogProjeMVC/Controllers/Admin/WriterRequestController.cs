@@ -9,7 +9,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
     public class WriterRequestController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string adminWriterRequestBasePath = "https://localhost:7181/api/admin/WriterRequest/";
+        private readonly string adminWriterRequestBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/WriterRequest/";
 
         public WriterRequestController(IHttpClientFactory httpClientFactory)
         {

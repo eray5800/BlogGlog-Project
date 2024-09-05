@@ -15,7 +15,7 @@ namespace BlogProjeMVC.Controllers
             _httpClient = httpClientFactory.CreateClient("BlogClient");
         }
 
-        private string baseAccountPath = "https://localhost:7181/api/Account/";
+        private string baseAccountPath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Account/";
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {

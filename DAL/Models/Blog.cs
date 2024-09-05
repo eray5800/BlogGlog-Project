@@ -6,6 +6,7 @@ namespace DAL.Models
     {
         public Guid BlogId { get; set; }
         public string BlogTitle { get; set; }
+        
         public string Content { get; set; }
         public AppUser User { get; set; }
         public Category Category { get; set; }

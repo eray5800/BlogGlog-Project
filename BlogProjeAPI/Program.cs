@@ -57,7 +57,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IWriterRequestService,WriterRequestService>();
+builder.Services.AddScoped<IWriterRequestService, WriterRequestService>();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<AppIdentityDBContext>()
@@ -122,13 +122,13 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blog API V1 ");
+    c.RoutePrefix = string.Empty;
+});
+
 
 app.UseHttpsRedirection();
 

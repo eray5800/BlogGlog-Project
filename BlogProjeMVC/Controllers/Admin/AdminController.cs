@@ -25,7 +25,7 @@ namespace BlogProjeMVC.Controllers.Admin
                 // Rolleri kontrol et
                 
 
-                if (roles == "Admin" )
+                if (!string.IsNullOrEmpty(roles) && roles == "Admin" )
                 {
                     return View(); 
                 }

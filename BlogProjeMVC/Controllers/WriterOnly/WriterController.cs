@@ -1,5 +1,6 @@
 ﻿using DAL.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System.Net.Http.Json;
 
 namespace BlogProjeMVC.Controllers.WriterOnly
@@ -8,11 +9,25 @@ namespace BlogProjeMVC.Controllers.WriterOnly
     public class WriterController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string writerBasePath = "https://localhost:7181/api/writer/";
+        private readonly string writerBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/writer/";
 
         public WriterController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient("BlogClient");
+        }
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            var roles = HttpContext.Session.GetString("UserRoles");
+
+            if (!string.IsNullOrEmpty(roles) && roles == "User")
+            {
+                await next();
+            }
+            else
+            {
+                context.Result = Unauthorized();
+            }
         }
 
         [HttpPost("addwriterrequest")]

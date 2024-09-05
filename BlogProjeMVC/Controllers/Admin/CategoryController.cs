@@ -8,7 +8,7 @@ namespace BlogProjeMVC.Controllers.Admin
     public class CategoryController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string adminCategoryBasePath = "https://localhost:7181/api/admin/category/";
+        private readonly string adminCategoryBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/category/";
 
         public CategoryController(IHttpClientFactory httpClientFactory)
         {

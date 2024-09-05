@@ -15,8 +15,8 @@ namespace BlogProjeMVC.Controllers
             _httpClient = httpClientFactory.CreateClient("BlogClient");
         }
 
-        private string basePath = "https://localhost:7181/api/Blog/";
-        private string categoryBasePath = "https://localhost:7181/api/admin/category/";
+        private string basePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/";
+        private string categoryBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/category/";
 
         public async Task<IActionResult> Index()
         {
@@ -45,7 +45,7 @@ namespace BlogProjeMVC.Controllers
             string categoryPath = GetFullPath(categoryBasePath, "GetAllCategories");
             var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(categoryPath);
             ViewBag.Categories = categories;
-            ViewBag.BlogImageBasePath = "https://localhost:7181/api/Blog/GetImage/";
+            ViewBag.BlogImageBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/GetImage/";
             return View(blogs);
         }
 
