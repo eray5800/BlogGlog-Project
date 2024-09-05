@@ -17,5 +17,9 @@ namespace DAL.Core.IRepository
 
         Task<IEnumerable<Blog>> GetAllUserBlogsByIDAsync(string userID);
 
+        Task<Blog> GetByIDActiveAsync(Guid blogID);
+
+        Task<IEnumerable<Blog>> GetAllActiveAsync();
+
     }
 }

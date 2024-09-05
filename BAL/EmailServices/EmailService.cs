@@ -1,8 +1,11 @@
 ﻿using BAL.EmailServices.EmailContents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Net.Mail;
+using Mailjet.Client;
+using Mailjet.Client.Resources;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace BAL.EmailServices
 {
@@ -22,29 +25,40 @@ namespace BAL.EmailServices
             string msg = string.Empty;
             try
             {
-                var message = new MailMessage();
-                var smtp = new SmtpClient();
+                // Load Mailjet API settings from configuration
+                var apiKey = _configuration["Mailjet:ApiKey"];
+                var apiSecret = _configuration["Mailjet:ApiSecret"];
+                var fromEmail = _configuration["Mailjet:FromEmail"];
+                var displayName = _configuration["Mailjet:DisplayName"];
 
-                // Load email settings from configuration
-                var emailSettings = _configuration.GetSection("EmailSettings");
+                var client = new MailjetClient(apiKey, apiSecret);
 
-                message.From = new MailAddress(emailSettings["From"], emailSettings["DisplayName"]);
-                message.To.Add(email);
-                message.Subject = emailContent.Subject;
-                message.IsBodyHtml = true;
-                message.Body = emailContent.Body;
+                var request = new MailjetRequest
+                {
+                    Resource = Send.Resource
+                }
+                .Property(Send.FromEmail, fromEmail)
+                .Property(Send.FromName, displayName)
+                .Property(Send.Subject, emailContent.Subject)
+                .Property(Send.HtmlPart, emailContent.Body)
+                .Property(Send.Recipients, new JArray {
+                    new JObject {
+                        {"Email", email}
+                    }
+                });
 
-                smtp.Port = int.Parse(emailSettings["SmtpPort"]);
-                smtp.Host = emailSettings["SmtpHost"];
-                smtp.EnableSsl = bool.Parse(emailSettings["EnableSsl"]);
-                smtp.UseDefaultCredentials = false;
-                smtp.Credentials = new NetworkCredential(emailSettings["Username"], emailSettings["Password"]);
-                smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+                var response = await client.PostAsync(request);
 
-                await smtp.SendMailAsync(message);
-
-                msg = $"Successfully sent email to {email}.";
-                _logger.LogWarning(msg);
+                if (response.IsSuccessStatusCode)
+                {
+                    msg = $"Successfully sent email to {email}.";
+                    _logger.LogWarning(msg);
+                }
+                else
+                {
+                    msg = $"Failed to send email to {email}. Status Code: {response.StatusCode}, Error: {response.GetErrorMessage()}";
+                    _logger.LogError(msg);
+                }
             }
             catch (Exception ex)
             {

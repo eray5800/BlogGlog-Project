@@ -17,6 +17,10 @@ namespace BAL.BlogServices
 
         Task<Blog> GetBlogByIDAsync(Guid blogID);
 
+        Task<IEnumerable<Blog>> GetAllActiveBlogsAsync();
+
+        Task<Blog> GetActiveBlogByIDAsync(Guid blogID);
+
         Task<IEnumerable<Blog>> Search(string text);
 
         Task<IEnumerable<Blog>> SearchBlogCategoryAsync(string text);

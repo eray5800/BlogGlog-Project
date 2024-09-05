@@ -170,11 +170,21 @@ namespace BAL.BlogServices
         {
             return await _unitOfWork.Blogs.GetAllAsync();
         }
+        public async Task<IEnumerable<Blog>> GetAllActiveBlogsAsync()
+        {
+            return await _unitOfWork.Blogs.GetAllActiveAsync();
+        }
 
         public async Task<Blog> GetBlogByIDAsync(Guid blogID)
         {
             var blog = await _unitOfWork.Blogs.GetByIDAsync(blogID);
-            return blog ?? new Blog();
+            return blog;
+        }
+
+        public async Task<Blog> GetActiveBlogByIDAsync(Guid blogID)
+        {
+            var blog = await _unitOfWork.Blogs.GetByIDActiveAsync(blogID);
+            return blog;
         }
 
         public async Task<IEnumerable<Blog>> Search(string text)

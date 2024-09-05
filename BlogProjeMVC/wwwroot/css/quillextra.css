@@ -11,25 +11,6 @@
     text-align: left;
 }
 
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="patrick-hand"]::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="patrick-hand"]::before {
-    content: 'Patrick Hand';
-    font-family: 'Patrick Hand', sans-serif;
-}
-
-.ql-font-patrick-hand {
-    font-family: 'Patrick Hand', sans-serif;
-}
-
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="dancing-script"]::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="dancing-script"]::before {
-    content: 'Dancing Script';
-    font-family: 'Dancing Script', sans-serif;
-}
-
-.ql-font-dancing-script {
-    font-family: 'Dancing Script', sans-serif;
-}
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before {

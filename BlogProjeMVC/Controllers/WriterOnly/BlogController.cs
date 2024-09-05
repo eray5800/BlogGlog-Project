@@ -4,6 +4,7 @@ using DAL.Models.DTO.BlogDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Net;
 using System.Text;
 
 namespace BlogProjeMVC.Controllers.WriterOnly
@@ -114,13 +115,36 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpGet("{blogID}")]
         public async Task<IActionResult> Detail(Guid blogID)
         {
-            string fullPath = GetFullPath(blogBasePath, $"GetBlogByID/{blogID}");
-            var blog = await _httpClient.GetFromJsonAsync<Blog>(fullPath);
-            ViewBag.BlogImageBasePath = BlogImageBasePath;
+            string fullPath = GetFullPath(blogBasePath, $"GetActiveBlogByID/{blogID}");
 
-            blog.Content = HtmlSanitizer.HtmlEncodeScriptTags(blog.Content);
-            return View(blog);
+            try
+            {
+                var response = await _httpClient.GetAsync(fullPath);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var blog = await response.Content.ReadFromJsonAsync<Blog>();
+                    ViewBag.BlogImageBasePath = BlogImageBasePath;
+                    blog.Content = HtmlSanitizer.HtmlEncodeScriptTags(blog.Content);
+
+                    return View(blog);
+                }
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return NotFound("Blog not found.");
+                }
+
+                return StatusCode((int)response.StatusCode, "Error retrieving blog.");
+            }
+            catch (HttpRequestException ex)
+            {
+
+                return StatusCode(500, "Internal server error.");
+            }
         }
+
+
 
         public async Task<IActionResult> Update(Guid blogID)
         {

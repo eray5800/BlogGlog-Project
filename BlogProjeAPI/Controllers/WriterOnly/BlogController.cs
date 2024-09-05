@@ -35,11 +35,30 @@ namespace BlogProjeAPI.Controllers.WriterOnly
             return Ok(blogs);
         }
 
+
+        [HttpGet]
+        [AllowAnonymous]
+
+        public async Task<IActionResult> GetAllActiveBlogs()
+        {
+            IEnumerable<Blog> blogs = await _blogService.GetAllActiveBlogsAsync();
+            return Ok(blogs);
+        }
+
         [HttpGet("{blogID}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetBlogByID(Guid blogID)
         {
             var blog = await _blogService.GetBlogByIDAsync(blogID);
+
+            return Ok(blog);
+        }
+
+        [HttpGet("{blogID}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetActiveBlogByID(Guid blogID)
+        {
+            var blog = await _blogService.GetActiveBlogByIDAsync(blogID);
             if (blog == null)
             {
                 return NotFound("Blog not found.");
@@ -47,15 +66,13 @@ namespace BlogProjeAPI.Controllers.WriterOnly
             return Ok(blog);
         }
 
+
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Search([FromQuery] string text)
         {
             var blogs = await _blogService.Search(text);
-            if (blogs == null || !blogs.Any())
-            {
-                return NotFound("No blogs found.");
-            }
             return Ok(blogs);
         }
 

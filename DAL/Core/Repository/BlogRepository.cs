@@ -67,7 +67,20 @@ namespace DAL.Core.Repository
             return blog;
         }
 
-        // READ - Get All
+        public async Task<Blog> GetByIDActiveAsync(Guid blogID)
+        {
+            var blog = await dbSet
+                .Include(b => b.BlogTags)
+                .Include(b => b.Category)
+                .Include(b => b.User)
+                .Include(b => b.BlogImages) // Include images
+                .Where(x => x.IsActive)
+                .FirstOrDefaultAsync(x => x.BlogId == blogID);
+
+            return blog;
+        }
+
+
         public override async Task<IEnumerable<Blog>> GetAllAsync()
         {
             try
@@ -76,12 +89,31 @@ namespace DAL.Core.Repository
                     .Include(b => b.Category)
                     .Include(b => b.BlogTags)
                     .Include(b => b.User)
-                    .Include(b => b.BlogImages) // Include images
+                    .Include(b => b.BlogImages)
                     .ToListAsync();
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Blog Repository GetAllAsync Method Error");
+                return new List<Blog>();
+            }
+        }
+
+        public async Task<IEnumerable<Blog>> GetAllActiveAsync()
+        {
+            try
+            {
+                return await dbSet
+                    .Include(b => b.Category)
+                    .Include(b => b.BlogTags)
+                    .Include(b => b.User)
+                    .Include(b => b.BlogImages)
+                    .Where(x => x.IsActive)
+                    .ToListAsync() ;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Blog Repository GetAllActiveAsync Method Error");
                 return new List<Blog>();
             }
         }

@@ -38,7 +38,7 @@ namespace BlogProjeMVC.Controllers
             }
             else
             {
-                string fullPath = GetFullPath(basePath, "GetAllBlogs");
+                string fullPath = GetFullPath(basePath, "GetAllActiveBlogs");
                 blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(fullPath);
             }
 
