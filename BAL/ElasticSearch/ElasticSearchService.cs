@@ -1,8 +1,8 @@
-﻿using BAL.ElasticSearch.Client;
-using BAL.ElasticSearch;
+﻿using BAL.ElasticSearch;
+using BAL.ElasticSearch.Client;
 using DAL.Models;
-using Elastic.Clients.Elasticsearch.QueryDsl;
 using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 using Microsoft.Extensions.Logging;
 
 public class ElasticSearchService : IElasticSearchService
@@ -75,19 +75,20 @@ public class ElasticSearchService : IElasticSearchService
                 Size = 10,
                 Query = new BoolQuery
                 {
-                    Must = new Query[]
-                    {
-                        new BoolQuery
-                        {
-                            Should = new Query[]
-                            {
+                    Must = new Query[]{
+                       new BoolQuery{
+                            Should = new Query[]{
                                 new WildcardQuery(new Field("blogTitle")) { Value = $"*{query}*" },
-                                new WildcardQuery(new Field("content")) { Value  = $"*{query}*" }
+                                new WildcardQuery(new Field("content")) { Value = $"*{query}*" }
                             }
-                        },
-                        new TermQuery(new Field("isActive")) { Value = true } // Filter for active blogs
+                       }
+                    },
+                    Filter = new Query[]
+                    {
+                        new TermQuery(new Field("isActive")) { Value = true } // Skorlama yapılmaz, filtre uygulanır
                     }
                 }
+
             };
             var response = await _elasticClient.SearchAsync<Blog>(searchRequest);
             return response.Documents.Count != 0 ? response.Documents : Enumerable.Empty<Blog>();
@@ -115,11 +116,14 @@ public class ElasticSearchService : IElasticSearchService
                 {
                     Must = new Query[]
                     {
-                        new MatchQuery(new Field("category.categoryName"))
-                        {
-                            Query = category
-                        },
-                        new TermQuery(new Field("isActive")) { Value = true } // Filter for active blogs
+                    new MatchQuery(new Field("category.categoryName"))
+                    {
+                        Query = category
+                    }
+                    },
+                    Filter = new Query[]
+                    {
+                    new TermQuery(new Field("isActive")) { Value = true }
                     }
                 }
             };
