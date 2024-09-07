@@ -8,6 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+
+
 
 namespace BlogProjeAPI.Controllers.WriterOnly
 {
@@ -93,25 +97,10 @@ namespace BlogProjeAPI.Controllers.WriterOnly
                 return BadRequest(new { Errors = errors });
             }
 
-            // Validate image files count and size
-            if (blogDto.BlogImages.Count > 5)
-            {
-                return BadRequest("You can upload a maximum of 5 images.");
-            }
 
-            const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
-            foreach (var image in blogDto.BlogImages)
-            {
-                var imageBytes = Convert.FromBase64String(image.Base64Image);
-                if (imageBytes.Length > maxFileSize)
-                {
-                    return BadRequest($"Each image must be smaller than 3 MB. An image is too large.");
-                }
-            }
+
 
             var userId = GetUserIdFromToken();
-            System.Diagnostics.Debug.WriteLine($"User ID from token: {userId}");
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("Invalid token");
@@ -123,22 +112,23 @@ namespace BlogProjeAPI.Controllers.WriterOnly
                 return Unauthorized("User not found");
             }
 
+            var validationResult = ValidateImages(blogDto.BlogImages);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.ErrorMessage);
+            }
+
             // Save images to storage
             var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Images");
-
-            // Create directory if it doesn't exist
-            if (!Directory.Exists(imageDirectory))
-            {
-                Directory.CreateDirectory(imageDirectory);
-            }
+            Directory.CreateDirectory(imageDirectory);
 
             foreach (var image in blogDto.BlogImages)
             {
-                var imageBytes = Convert.FromBase64String(image.Base64Image);
-                var fileName = string.Concat(Guid.NewGuid(), image.BlogImageExtension);
+                var fileName = $"{Guid.NewGuid()}{image.BlogImageExtension}";
                 var filePath = Path.Combine(imageDirectory, fileName);
                 image.BlogImageName = fileName;
-                await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+
+                await SaveImageAsync(image.Base64Image, filePath);
             }
 
             var result = await _blogService.CreateBlogAsync(blogDto, user);
@@ -147,7 +137,6 @@ namespace BlogProjeAPI.Controllers.WriterOnly
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error adding the blog.");
             }
 
-            System.Diagnostics.Debug.WriteLine("Blog added successfully.");
             return Ok("Blog added successfully.");
         }
 
@@ -174,20 +163,13 @@ namespace BlogProjeAPI.Controllers.WriterOnly
                 return Unauthorized("You are not authorized to update this blog.");
             }
 
-            // Validate image files count and size
-            if (blogDto.BlogImages.Count > 5)
-            {
-                return BadRequest("You can upload a maximum of 5 images.");
-            }
+            
 
-            const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
-            foreach (var image in blogDto.BlogImages)
+            
+            var validationResult = ValidateImages(blogDto.BlogImages);
+            if (!validationResult.IsValid)
             {
-                var imageBytes = Convert.FromBase64String(image.Base64Image);
-                if (imageBytes.Length > maxFileSize)
-                {
-                    return BadRequest($"Each image must be smaller than 3 MB. An image is too large.");
-                }
+                return BadRequest(validationResult.ErrorMessage);
             }
 
             // Save images to storage
@@ -210,11 +192,10 @@ namespace BlogProjeAPI.Controllers.WriterOnly
             // Save new images to storage
             foreach (var image in blogDto.BlogImages)
             {
-                var imageBytes = Convert.FromBase64String(image.Base64Image);
-                var fileName = $"{Guid.NewGuid()}.{image.BlogImageExtension}";
+                var fileName = $"{Guid.NewGuid()}{image.BlogImageExtension}";
                 var filePath = Path.Combine(imageDirectory, fileName);
                 image.BlogImageName = fileName;
-                await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+                await SaveImageAsync(image.Base64Image, filePath);
             }
 
             var result = await _blogService.UpdateBlogAsync(blogID, blogDto);
@@ -255,6 +236,8 @@ namespace BlogProjeAPI.Controllers.WriterOnly
         [HttpDelete("{blogID}")]
         public async Task<IActionResult> DeleteBlog(Guid blogID)
         {
+            string deneme = "123521521521";
+
             var blog = await _blogService.GetBlogByIDAsync(blogID);
             if (blog == null)
             {
@@ -313,6 +296,57 @@ namespace BlogProjeAPI.Controllers.WriterOnly
             catch
             {
                 return null;
+            }
+        }
+
+        private (bool IsValid, string ErrorMessage) ValidateImages(IEnumerable<BlogImageDTO> images)
+        {
+            const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
+
+            if (images.Count() > 5)
+            {
+                return (false, "You can upload a maximum of 5 images.");
+
+            }
+            foreach (var image in images)
+            {
+                try
+                {
+                    var imageBytes = Convert.FromBase64String(image.Base64Image);
+
+
+
+                    if (imageBytes.Length > maxFileSize)
+                    {
+                        return (false, $"Each image must be smaller than 3 MB. An image is too large.");
+                    }
+
+                    using (var imageStream = new MemoryStream(imageBytes))
+                    {
+                        using (var img = Image.Load<Rgba32>(imageStream))
+                        {
+                            // Additional image processing if necessary
+                        }
+                    }
+                }
+                catch
+                {
+                    return (false, "One or more images are not valid.");
+                }
+            }
+
+            return (true, null);
+        }
+
+        private async Task SaveImageAsync(string base64Image, string filePath)
+        {
+            var imageBytes = Convert.FromBase64String(base64Image);
+            await using (var imageStream = new MemoryStream(imageBytes))
+            {
+                using (var img = Image.Load<Rgba32>(imageStream))
+                {
+                    await img.SaveAsync(filePath);
+                }
             }
         }
     }
