@@ -10,6 +10,7 @@ namespace GenericRepoAndUnitOfWork.Core.IRepository
 
         Task<bool> AddAsync(TDTO entity);
         Task<bool> AddAsync(T entity);
+
         Task<bool> AddAllAsync(IEnumerable<T> entities);
         Task<bool> DeleteAllAsync(Expression<Func<T, bool>> filter);
 

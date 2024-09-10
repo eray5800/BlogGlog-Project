@@ -5,7 +5,7 @@ using GenericRepoAndUnitOfWork.Core.IConfiguration;
 
 namespace BAL.BlogServices
 {
-    public class BlogService : IBlogService 
+    public class BlogService : IBlogService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IElasticSearchService _elasticSearchService;
@@ -41,7 +41,6 @@ namespace BAL.BlogServices
             }
             catch (Exception ex)
             {
-                // Log the exception
                 Console.WriteLine(ex.Message);
                 throw;
             }
@@ -59,10 +58,8 @@ namespace BAL.BlogServices
 
             if (result != null)
             {
-                // Handle blog tags
                 var blogTagResult = await UpdateBlogTagsAsync(blogID, blogDto.BlogTags);
 
-                // Handle blog images
                 var blogImageResult = await UpdateBlogImagesAsync(blogID, blogDto.BlogImages);
 
                 if (blogTagResult != null && blogImageResult != null)
@@ -79,8 +76,6 @@ namespace BAL.BlogServices
             }
             return false;
         }
-
-
 
         public async Task<bool> DeleteBlogAsync(Guid blogId)
         {
@@ -131,7 +126,6 @@ namespace BAL.BlogServices
 
         private async Task<Blog> UpdateBlogImagesAsync(Guid blogID, List<BlogImageDTO> blogImageDtos)
         {
-            // Retrieve the existing blog
             var existingBlog = await _unitOfWork.Blogs.GetByIDAsync(blogID);
 
             if (existingBlog == null)
@@ -139,18 +133,15 @@ namespace BAL.BlogServices
                 return null;
             }
 
-            // Delete existing images associated with the blog
             await _unitOfWork.BlogImages.DeleteAllAsync(img => img.Blog.BlogId == blogID);
 
-            // Map BlogImageDTOs to BlogImage entities
             var newImages = blogImageDtos.Select(dto => new BlogImage
             {
                 BlogImageID = Guid.NewGuid(),
-                BlogImageName = dto.BlogImageName, // Assuming BlogImageDTO has BlogImageName
+                BlogImageName = dto.BlogImageName,
                 Blog = existingBlog
             }).ToList();
 
-            // Add new images to the repository
             foreach (var image in newImages)
             {
                 await _unitOfWork.BlogImages.AddAsync(image);
@@ -158,7 +149,6 @@ namespace BAL.BlogServices
 
             return existingBlog;
         }
-
 
         public async Task<IEnumerable<Blog>> GetAllUserBlogsAsync(string userID)
         {

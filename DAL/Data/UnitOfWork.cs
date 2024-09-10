@@ -21,6 +21,7 @@ namespace GenericRepoAndUnitOfWork.Data
 
         public IBlogImageRepository BlogImages { get; private set; }
 
+        public IBlogLikeRepository BlogLikes { get; private set; }
         public IWriterRequestRepository WriterRequests { get; private set; }
 
 
@@ -35,6 +36,7 @@ namespace GenericRepoAndUnitOfWork.Data
             this.BlogTags = new BlogTagRepository(context, this.logger);
             this.WriterRequests  = new WriterRequestRepository(context, this.logger);
             this.BlogImages = new BlogImageRepository(context, this.logger);
+            this.BlogLikes = new BlogLikeRepository(context, this.logger);
         }
 
         public async Task CompleteAsync()

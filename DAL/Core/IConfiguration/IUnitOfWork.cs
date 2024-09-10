@@ -12,6 +12,10 @@ namespace GenericRepoAndUnitOfWork.Core.IConfiguration
 
         IBlogImageRepository BlogImages { get; }
 
+
+        IBlogLikeRepository BlogLikes { get; }
+
+
         IWriterRequestRepository WriterRequests { get; }
         Task CompleteAsync();
     }

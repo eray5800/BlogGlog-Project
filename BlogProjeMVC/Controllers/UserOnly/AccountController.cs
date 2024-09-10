@@ -4,7 +4,7 @@ using DAL.Models.HelperModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace BlogProjeMVC.Controllers
+namespace BlogProjeMVC.Controllers.UserOnly
 {
     public class AccountController : Controller
     {

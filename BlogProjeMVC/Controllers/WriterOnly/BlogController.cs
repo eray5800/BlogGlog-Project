@@ -1,7 +1,6 @@
 ﻿using BlogProjeMVC.HtmlHelpers;
 using DAL.Models;
 using DAL.Models.DTO.BlogDTO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Net;
@@ -24,6 +23,8 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         private readonly string categoryBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/category/";
         private readonly string blogBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/";
         private readonly string BlogImageBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/GetImage/";
+        private readonly string BlogLikeBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/BlogLike/";
+
 
         private bool IsUserInRole(string role)
         {
@@ -93,8 +94,21 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 {
                     var blog = await response.Content.ReadFromJsonAsync<Blog>();
                     ViewBag.BlogImageBasePath = BlogImageBasePath;
-                    blog.Content = HtmlSanitizer.HtmlEncodeScriptTags(blog.Content);
 
+                    var BlogImagesResponse = await _httpClient.GetAsync(GetFullPath(BlogLikeBasePath, $"GetBlogLikes/{blogID}"));
+                    ViewBag.BlogLikeCount = await BlogImagesResponse.Content.ReadAsStringAsync();
+
+                    if (IsUserInRole("Admin") || IsUserInRole("Writer") || IsUserInRole("User"))
+                    {
+                        var UserLike = await _httpClient.GetFromJsonAsync<BlogLike>(GetFullPath(BlogLikeBasePath, $"GetUserBlogLike/{blogID}"));
+                        ViewBag.UserLike = UserLike.BlogLikeID != Guid.Empty ? true : false;
+                    }
+                    else
+                    {
+                        ViewBag.UserLike = null;
+                    }
+
+                    blog.Content = HtmlSanitizer.HtmlEncodeScriptTags(blog.Content);
                     return View(blog);
                 }
 
@@ -180,8 +194,6 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 return View(blogDto);
             }
         }
-
-
 
         private async Task<bool> ProcessImagesAsync(BlogDTO blogDto, List<IFormFile> imageFiles)
         {

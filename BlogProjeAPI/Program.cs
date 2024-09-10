@@ -58,6 +58,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IWriterRequestService, WriterRequestService>();
+builder.Services.AddScoped<IBlogLikeService, BlogLikeService>();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<AppIdentityDBContext>()
