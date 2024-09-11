@@ -136,7 +136,7 @@ public class AuthController : ControllerBase
         new Claim(ClaimTypes.Name, user.UserName)
         };
 
-        // Rolleri claim'lere ekle
+        
         claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

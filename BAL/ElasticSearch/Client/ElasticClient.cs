@@ -23,7 +23,7 @@ namespace BAL.ElasticSearch.Client
             var elasticUri = elasticSettings["Uri"];
 
             var settings = new ElasticsearchClientSettings(new Uri(elasticUri))
-                .DefaultIndex("products")
+                .DefaultIndex("blogs")
                 .Authentication(new ApiKeyAuthenticationHeader(apiKey))
                 .ServerCertificateValidationCallback((sender, certificate, chain, sslPolicyErrors) => true);
 
