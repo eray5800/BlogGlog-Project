@@ -44,8 +44,6 @@
 </div>
 
 @section Styles {
-    <!-- Include Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Dancing+Script&family=Arial&family=Courier+New&family=Times+New+Roman&display=swap" rel="stylesheet">
 
     <!-- Include Quill's CSS from CDN -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -62,26 +60,12 @@
 
     <!-- Initialize Quill editor -->
     <script>
-        // Define fonts
-        var fonts = ['Arial', 'Courier New', 'Times New Roman'];
-
-        // Generate code friendly names
-        function getFontName(font) {
-            return font.toLowerCase().replace(/\s/g, "-");
-        }
-        var fontNames = fonts.map(font => getFontName(font));
-
-        // Add fonts to whitelist
-        var Font = Quill.import('formats/font');
-        Font.whitelist = fontNames;
-        Quill.register(Font, true);
-
         var quill = new Quill('#editor-container', {
             theme: 'snow',
             modules: {
                 toolbar: {
                     container: [
-                        [{ 'font': fontNames }],  // Custom font options
+                        [{ 'font': [] }],  // Use default font options
                         [{ 'header': [1, 2, false] }],
                         ['bold', 'italic', 'underline'],
                         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -100,6 +84,12 @@
             formats: [
                 'font', 'header', 'bold', 'italic', 'underline', 'list', 'bullet', 'script', 'align', 'link', 'emoji', 'color', 'background', 'code-block'
             ]
+        });
+
+        // Set Quill editor content from hidden textarea
+        document.addEventListener('DOMContentLoaded', function () {
+            var content = document.querySelector('textarea[name="Content"]').value;
+            quill.root.innerHTML = content;
         });
 
         // Function to copy Quill content to hidden textarea

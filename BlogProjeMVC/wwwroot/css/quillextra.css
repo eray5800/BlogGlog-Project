@@ -11,35 +11,12 @@
     text-align: left;
 }
 
-
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before {
-    content: 'Arial';
-    font-family: 'Arial', sans-serif;
+.ql-font-serif {
+    font-family: Georgia, Times New Roman, serif !important;
 }
 
-.ql-font-arial {
-    font-family: 'Arial', sans-serif;
-}
-
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="courier-new"]::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="courier-new"]::before {
-    content: 'Courier New';
-    font-family: 'Courier New', monospace;
-}
-
-.ql-font-courier-new {
-    font-family: 'Courier New', monospace;
-}
-
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="times-new-roman"]::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="times-new-roman"]::before {
-    content: 'Times New Roman';
-    font-family: 'Times New Roman', serif;
-}
-
-.ql-font-times-new-roman {
-    font-family: 'Times New Roman', serif;
+.ql-font-monospace {
+    font-family: Monaco, Courier New, monospace !important;
 }
 
 .ql-syntax{

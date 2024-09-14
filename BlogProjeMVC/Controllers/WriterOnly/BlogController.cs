@@ -47,38 +47,31 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpPost]
         public async Task<IActionResult> Create(BlogDTO blogDto, List<IFormFile> imageFiles)
         {
-            if (!IsUserInRole("Admin") && !IsUserInRole("Writer"))
+            if (!IsUserAuthorized())
             {
-                return Unauthorized();
+                return UnauthorizedResult();
             }
 
-            if (!ModelState.IsValid)
+            if (!IsModelValid(blogDto))
             {
-                await LoadCategoriesAsync();
-                return View(blogDto);
+                return await InvalidModelState(blogDto);
             }
 
-            ValidateImageFiles(imageFiles);
+            if (!ValidateImageFiles(imageFiles))
+            {
+                return await ImageValidationFailed(blogDto);
+            }
 
             if (!await ProcessImagesAsync(blogDto, imageFiles))
             {
-                await LoadCategoriesAsync();
-                ModelState.AddModelError("", "Please choose correct image files.");
-                return View(blogDto);
+                return await ImageProcessingFailed(blogDto);
             }
 
-            var response = await _httpClient.PostAsJsonAsync(GetFullPath(blogBasePath, "AddBlog"), blogDto);
+            var response = await SendPostRequestAsync("CreateBlog", blogDto);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            else
-            {
-                await LoadCategoriesAsync();
-                ModelState.AddModelError("", "An error occurred while creating the blog.");
-                return View(blogDto);
-            }
+            return response.IsSuccessStatusCode
+                ? RedirectToAction("Index", "Home")
+                : await HandleApiError(response, blogDto);
         }
 
         [HttpGet("{blogID}")]
@@ -158,41 +151,32 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpPost]
         public async Task<IActionResult> Update(BlogDTO blogDto, List<IFormFile> imageFiles)
         {
-            if (!IsUserInRole("Admin") && !IsUserInRole("Writer"))
+            if (!IsUserAuthorized())
             {
-                return Unauthorized();
+                return UnauthorizedResult();
             }
 
-            if (!ModelState.IsValid)
+            if (!IsModelValid(blogDto))
             {
-                await LoadCategoriesAsync();
-                return View(blogDto);
+                return await InvalidModelState(blogDto);
             }
 
-            ValidateImageFiles(imageFiles);
-
+            if (!ValidateImageFiles(imageFiles))
+            {
+                return await ImageValidationFailed(blogDto);
+            }
 
             if (!await ProcessImagesAsync(blogDto, imageFiles))
             {
-                await LoadCategoriesAsync();
-                ModelState.AddModelError("", "Please choose correct image files.");
-                return View(blogDto);
+                return await ImageProcessingFailed(blogDto);
             }
+            var response = await SendPutRequestAsync($"UpdateBlog/{blogDto.BlogID}", blogDto);
 
-            var response = await _httpClient.PutAsJsonAsync(GetFullPath(blogBasePath, $"UpdateBlog/{blogDto.BlogID}"), blogDto);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            else
-            {
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError("", $"An error occurred while updating the blog: {errorMessage}");
 
-                await LoadCategoriesAsync();
-                return View(blogDto);
-            }
+            return response.IsSuccessStatusCode
+                ? RedirectToAction("Index", "Home")
+                : await HandleApiError(response, blogDto);
         }
 
         private async Task<bool> ProcessImagesAsync(BlogDTO blogDto, List<IFormFile> imageFiles)
@@ -219,20 +203,26 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                         });
                     }
                 }
+                else
+                {
+                   return false;
+                }
             }
             return true;
         }
 
-        private void ValidateImageFiles(List<IFormFile> imageFiles)
+        private bool ValidateImageFiles(List<IFormFile> imageFiles)
         {
             if (imageFiles == null || !imageFiles.Any())
             {
                 ModelState.AddModelError("", "You must upload at least one image.");
+                return false;
             }
 
             if (imageFiles.Count > 5)
             {
                 ModelState.AddModelError("", "You can upload a maximum of 5 images.");
+                return false;
             }
 
             const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
@@ -241,8 +231,10 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 if (file.Length > maxFileSize)
                 {
                     ModelState.AddModelError("", $"Each image must be smaller than 3 MB. '{file.FileName}' is too large.");
+                    return false;
                 }
             }
+            return true;
         }
         private async Task LoadCategoriesAsync()
         {
@@ -281,27 +273,81 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpPost("{blogID}")]
         public async Task<IActionResult> DeleteBlog(Guid blogID)
         {
-            if (!IsUserInRole("Admin") && !IsUserInRole("Writer"))
+            if (!IsUserAuthorized())
             {
-                return Unauthorized();
+                return UnauthorizedResult();
             }
 
-            var response = await _httpClient.DeleteAsync(GetFullPath(blogBasePath, $"DeleteBlog/{blogID}"));
+            var response = await SendDeleteRequestAsync($"DeleteBlog/{blogID}");
 
-            if (response.IsSuccessStatusCode)
-            {
-                TempData["SuccessMessage"] = "Successfully deleted the blog";
-                return RedirectToAction("Profile", "Account");
-            }
-            else
-            {
-                return BadRequest();
-            }
+            return response.IsSuccessStatusCode
+                ? RedirectToAction("Index", "Home")
+                : await HandleApiError(response, new BlogDTO { BlogID = blogID });
         }
+
+
 
         public string GetFullPath(string basePath, string actionName)
         {
             return string.Concat(basePath, actionName);
+        }
+
+        private bool IsUserAuthorized()
+        {
+            return IsUserInRole("Admin") || IsUserInRole("Writer");
+        }
+
+        private IActionResult UnauthorizedResult()
+        {
+            return Unauthorized();
+        }
+
+        private bool IsModelValid(BlogDTO blogDto)
+        {
+            return ModelState.IsValid;
+        }
+
+        private async Task<IActionResult> InvalidModelState(BlogDTO blogDto)
+        {
+            await LoadCategoriesAsync();
+            return View(blogDto);
+        }
+
+        private async Task<IActionResult> ImageValidationFailed(BlogDTO blogDto)
+        {
+            await LoadCategoriesAsync();
+            ModelState.AddModelError("", "Please choose correct image files.");
+            return View(blogDto);
+        }
+
+        private async Task<IActionResult> ImageProcessingFailed(BlogDTO blogDto)
+        {
+            await LoadCategoriesAsync();
+            return View(blogDto);
+        }
+
+        private async Task<HttpResponseMessage> SendPutRequestAsync(string endpoint, BlogDTO blogDto)
+        {
+            return await _httpClient.PutAsJsonAsync(GetFullPath(blogBasePath, endpoint), blogDto);
+        }
+
+        private async Task<HttpResponseMessage> SendPostRequestAsync(string endpoint, BlogDTO blogDto)
+        {
+            return await _httpClient.PostAsJsonAsync(GetFullPath(blogBasePath, endpoint), blogDto);
+        }
+
+        private async Task<HttpResponseMessage> SendDeleteRequestAsync(string endpoint)
+        {
+            return await _httpClient.DeleteAsync(GetFullPath(blogBasePath, endpoint));
+        }
+
+        private async Task<IActionResult> HandleApiError(HttpResponseMessage response, BlogDTO blogDto)
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            ModelState.AddModelError("", $"An error occurred: {errorMessage}");
+
+            await LoadCategoriesAsync();
+            return View(blogDto);
         }
     }
 }

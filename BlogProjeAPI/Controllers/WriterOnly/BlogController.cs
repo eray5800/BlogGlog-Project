@@ -303,6 +303,10 @@ namespace BlogProjeAPI.Controllers.WriterOnly
         {
             const long maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
 
+            if(images.Count() == 0)
+            {
+                return (false, "You need to select a image");
+            }
             if (images.Count() > 5)
             {
                 return (false, "You can upload a maximum of 5 images.");
