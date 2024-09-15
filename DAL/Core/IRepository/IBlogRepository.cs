@@ -7,9 +7,9 @@ namespace DAL.Core.IRepository
     public interface IBlogRepository : IGenericRepository<Blog, BlogDTO>
     {
 
-        Task<Blog> AddAsync(BlogDTO blogDto, Category category, AppUser user);
+        Task<Blog> AddAsync(Blog blog, Category category, AppUser user);
 
-        Task<Blog> UpdateAsync(Guid blogID, BlogDTO blogDto, Category category);
+        Task<Blog> UpdateAsync(Blog blog, BlogDTO blogDto, Category category);
 
         
         Task<IEnumerable<Blog>> SearchAsync(string text);

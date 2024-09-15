@@ -15,43 +15,17 @@ namespace DAL.Core.Repository
         }
 
         // CREATE
-        public async Task<Blog> AddAsync(BlogDTO blogDto, Category category, AppUser user)
+        public async Task<Blog> AddAsync(Blog blog, Category category, AppUser user)
         {
-            var blog = new Blog
+            try
             {
-                BlogId = Guid.NewGuid(),
-                User = user,
-                BlogTitle = blogDto.BlogTitle,
-                BlogTags = blogDto.BlogTags.Contains(',')
-                    ? blogDto.BlogTags.Split(',')
-                        .Select(tag => new BlogTag
-                        {
-                            BlogTagID = Guid.NewGuid(),
-                            TagName = tag.Trim()
-                        })
-                        .ToList()
-                    : new List<BlogTag>
-                    {
-                new BlogTag
-                {
-                    BlogTagID = Guid.NewGuid(),
-                    TagName = blogDto.BlogTags.Trim()
-                }
-                    },
-                Content = blogDto.Content,
-                Category = category,
-                Created_At = DateTime.Now,
-                Updated_At = DateTime.Now,
-                IsActive = blogDto.IsActive,
-                BlogImages = blogDto.BlogImages?.Select(imageDto => new BlogImage
-                {
-                    BlogImageID = Guid.NewGuid(),
-                    BlogImageName = imageDto.BlogImageName
-                }).ToList() ?? new List<BlogImage>()
-            };
+                await dbSet.AddAsync(blog);
+                return blog;
+            } catch(Exception ex)
+            {
+                return new Blog();
+            }
 
-            await dbSet.AddAsync(blog);
-            return blog;
         }
 
 
@@ -129,16 +103,8 @@ namespace DAL.Core.Repository
                 .ToListAsync();
         }
 
-        public async Task<Blog> UpdateAsync(Guid blogID, BlogDTO blogDto, Category category)
+        public async Task<Blog> UpdateAsync(Blog existingBlog, BlogDTO blogDto, Category category)
         {
-            var existingBlog = await dbSet
-                .Include(b => b.Category)
-                .Include(b => b.User)
-                .Include(b => b.BlogImages) // Include images
-                .FirstOrDefaultAsync(x => x.BlogId == blogID);
-
-            if (existingBlog == null) return null;
-
             try
             {
                 // Update properties

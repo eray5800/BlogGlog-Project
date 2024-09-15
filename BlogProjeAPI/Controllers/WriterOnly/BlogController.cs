@@ -89,7 +89,7 @@ namespace BlogProjeAPI.Controllers.WriterOnly
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddBlog([FromBody] BlogDTO blogDto)
+        public async Task<IActionResult> CreateBlog([FromBody] BlogDTO blogDto)
         {
             if (!ModelState.IsValid)
             {

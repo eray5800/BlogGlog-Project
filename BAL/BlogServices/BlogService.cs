@@ -25,13 +25,44 @@ namespace BAL.BlogServices
                 {
                     return false;
                 }
-
-                var result = await _unitOfWork.Blogs.AddAsync(blogDto, category, user);
+                var blog = new Blog
+                {
+                    BlogId = Guid.NewGuid(),
+                    User = user,
+                    BlogTitle = blogDto.BlogTitle,
+                    BlogTags = blogDto.BlogTags.Contains(',')
+                       ? blogDto.BlogTags.Split(',')
+                           .Select(tag => new BlogTag
+                           {
+                               BlogTagID = Guid.NewGuid(),
+                               TagName = tag.Trim()
+                           })
+                           .ToList()
+                       : new List<BlogTag>
+                       {
+                    new BlogTag
+                    {
+                        BlogTagID = Guid.NewGuid(),
+                        TagName = blogDto.BlogTags.Trim()
+                    }
+                       },
+                    Content = blogDto.Content,
+                    Category = category,
+                    Created_At = DateTime.Now,
+                    Updated_At = DateTime.Now,
+                    IsActive = blogDto.IsActive,
+                    BlogImages = blogDto.BlogImages?.Select(imageDto => new BlogImage
+                    {
+                        BlogImageID = Guid.NewGuid(),
+                        BlogImageName = imageDto.BlogImageName
+                    }).ToList() ?? new List<BlogImage>()
+                };
+                var result = await _unitOfWork.Blogs.AddAsync(blog, category, user);
                 if (result != null)
                 {
                     await _unitOfWork.CompleteAsync();
 
-                    var elasticResult = await _elasticSearchService.CreateBlogAsync(result);
+                    var elasticResult = await _elasticSearchService.CreateBlogAsync(blog);
                     if (!elasticResult)
                     {
                         return false;
@@ -53,8 +84,8 @@ namespace BAL.BlogServices
             {
                 return false;
             }
-
-            var result = await _unitOfWork.Blogs.UpdateAsync(blogID, blogDto, category);
+            var blog = await _unitOfWork.Blogs.GetByIDAsync(blogID);
+            var result = await _unitOfWork.Blogs.UpdateAsync(blog, blogDto, category);
 
             if (result != null)
             {
@@ -83,6 +114,7 @@ namespace BAL.BlogServices
             if (result)
             {
                 await _unitOfWork.BlogImages.DeleteAllAsync(img => img.Blog.BlogId == blogId);
+                await _unitOfWork.BlogTags.DeleteAllAsync(tag => tag.Blog.BlogId == blogId);
                 await _unitOfWork.CompleteAsync();
 
                 var elasticResult = await _elasticSearchService.DeleteBlogAsync(blogId);
@@ -198,4 +230,3 @@ namespace BAL.BlogServices
         }
     }
 }
-
