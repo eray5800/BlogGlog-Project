@@ -85,25 +85,30 @@ namespace BAL.BlogServices
                 return false;
             }
             var blog = await _unitOfWork.Blogs.GetByIDAsync(blogID);
+            if(blog == null || blog.BlogId == Guid.Empty)
+            {
+                return false;
+            }
             var result = await _unitOfWork.Blogs.UpdateAsync(blog, blogDto, category);
 
             if (result != null)
             {
-                var blogTagResult = await UpdateBlogTagsAsync(blogID, blogDto.BlogTags);
+                var blogTagResult = await UpdateBlogTagsAsync(blog, blogDto.BlogTags);
 
-                var blogImageResult = await UpdateBlogImagesAsync(blogID, blogDto.BlogImages);
+                var blogImageResult = await UpdateBlogImagesAsync(blog, blogDto.BlogImages);
 
                 if (blogTagResult != null && blogImageResult != null)
                 {
                     await _unitOfWork.CompleteAsync();
 
-                    var elasticResult = await _elasticSearchService.UpdateBlogAsync(blogTagResult);
+                    var elasticResult = await _elasticSearchService.UpdateBlogAsync(blog);
                     if (!elasticResult)
                     {
                         return false;
                     }
                     return true;
                 }
+               
             }
             return false;
         }
@@ -126,20 +131,14 @@ namespace BAL.BlogServices
             return result;
         }
 
-        private async Task<Blog> UpdateBlogTagsAsync(Guid blogID, string blogTags)
+        private async Task<Blog> UpdateBlogTagsAsync(Blog existingBlog, string blogTags)
         {
-            var existingBlog = await _unitOfWork.Blogs.GetByIDAsync(blogID);
-
-            if (existingBlog == null)
-            {
-                return null;
-            }
 
             var newTagNames = blogTags.Contains(',')
                 ? blogTags.Split(',').Select(tag => tag.Trim()).ToList()
                 : new List<string> { blogTags.Trim() };
 
-            await _unitOfWork.BlogTags.DeleteAllAsync(tag => tag.Blog.BlogId == blogID);
+            await _unitOfWork.BlogTags.DeleteAllAsync(tag => tag.Blog.BlogId == existingBlog.BlogId);
 
             var newTags = newTagNames.Select(tag => new BlogTag
             {
@@ -156,16 +155,9 @@ namespace BAL.BlogServices
             return existingBlog;
         }
 
-        private async Task<Blog> UpdateBlogImagesAsync(Guid blogID, List<BlogImageDTO> blogImageDtos)
+        private async Task<Blog> UpdateBlogImagesAsync(Blog existingBlog, List<BlogImageDTO> blogImageDtos)
         {
-            var existingBlog = await _unitOfWork.Blogs.GetByIDAsync(blogID);
-
-            if (existingBlog == null)
-            {
-                return null;
-            }
-
-            await _unitOfWork.BlogImages.DeleteAllAsync(img => img.Blog.BlogId == blogID);
+            await _unitOfWork.BlogImages.DeleteAllAsync(img => img.Blog.BlogId == existingBlog.BlogId);
 
             var newImages = blogImageDtos.Select(dto => new BlogImage
             {
