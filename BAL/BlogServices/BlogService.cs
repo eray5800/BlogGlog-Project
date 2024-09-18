@@ -120,6 +120,7 @@ namespace BAL.BlogServices
             {
                 await _unitOfWork.BlogImages.DeleteAllAsync(img => img.Blog.BlogId == blogId);
                 await _unitOfWork.BlogTags.DeleteAllAsync(tag => tag.Blog.BlogId == blogId);
+                await _unitOfWork.BlogLikes.DeleteAllAsync(like => like.Blog.BlogId == blogId);
                 await _unitOfWork.CompleteAsync();
 
                 var elasticResult = await _elasticSearchService.DeleteBlogAsync(blogId);
