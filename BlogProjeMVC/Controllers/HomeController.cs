@@ -1,6 +1,8 @@
 using DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace BlogProjeMVC.Controllers
 {
@@ -18,7 +20,7 @@ namespace BlogProjeMVC.Controllers
         private string basePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/";
         private string categoryBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/category/";
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
             if (TempData["SuccessMessage"] != null)
             {
@@ -30,24 +32,36 @@ namespace BlogProjeMVC.Controllers
                 ViewBag.ErrorMessage = TempData["ErrorMessage"].ToString();
             }
 
+            IEnumerable<Blog> blogList;
 
-            IEnumerable<Blog> blogs;
-            if (TempData["SearchBlogs"] != null)
+            // Check if session has search results
+            string searchResults = HttpContext.Session.GetString("SearchResults");
+
+            if (!string.IsNullOrEmpty(searchResults))
             {
-                blogs = JsonConvert.DeserializeObject<IEnumerable<Blog>>(TempData["SearchBlogs"].ToString());
+                blogList = JsonConvert.DeserializeObject<IEnumerable<Blog>>(searchResults);
             }
             else
             {
-                string fullPath = GetFullPath(basePath, "GetAllActiveBlogs");
-                blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(fullPath);
+                // If no search results in session, get all active blogs
+                string fullPath = GetFullPath(basePath, $"GetAllActiveBlogs");
+                blogList = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(fullPath);
             }
 
+            // Set page size and total item count
+            int pageSize = 1; // Sayfa baþýna gösterilecek blog sayýsý
+            int totalItemCount = blogList.Count();
+            IPagedList<Blog> pagedBlogs = blogList.ToPagedList(page, pageSize);
+
+            // Load categories
             string categoryPath = GetFullPath(categoryBasePath, "GetAllCategories");
             var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(categoryPath);
             ViewBag.Categories = categories;
             ViewBag.BlogImageBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/GetImage/";
-            return View(blogs);
+
+            return View(pagedBlogs);
         }
+
 
         public string GetFullPath(string basePath, string actionName)
         {

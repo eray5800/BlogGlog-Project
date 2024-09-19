@@ -251,29 +251,36 @@ namespace BlogProjeMVC.Controllers.WriterOnly
             }
 
             var blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(GetFullPath(blogBasePath, $"Search?Text={textSearch}"));
-            TempData["SearchBlogs"] = JsonConvert.SerializeObject(blogs);
+
+            HttpContext.Session.SetString("SearchResults", JsonConvert.SerializeObject(blogs));
 
             return RedirectToAction("Index", "Home");
         }
+
+
 
         public async Task<IActionResult> CategorySearch([FromQuery] string categoryName)
         {
             if (string.IsNullOrEmpty(categoryName))
             {
-                TempData["ErrorMessage"] = "Please choose category";
+                TempData["ErrorMessage"] = "Please choose a category";
                 return RedirectToAction("Index", "Home");
             }
 
             var blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(GetFullPath(blogBasePath, $"CategorySearch?Text={categoryName}"));
-            TempData["SearchBlogs"] = JsonConvert.SerializeObject(blogs);
+
+            HttpContext.Session.SetString("SearchResults", JsonConvert.SerializeObject(blogs));
 
             return RedirectToAction("Index", "Home");
         }
 
+
+        
+
         [HttpPost("{blogID}")]
         public async Task<IActionResult> DeleteBlog(Guid blogID)
         {
-            if (!IsUserAuthorized())
+            if (!IsUserAuthorized()) 
             {
                 return UnauthorizedResult();
             }
