@@ -2,36 +2,37 @@ using BlogProjeAPI.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("RedisCache");
+    options.InstanceName = builder.Configuration["RedisSettings:InstanceName"];
+});
 
 builder.Services.AddTransient<AuthMessageHandler>();
 
 builder.Services.AddHttpClient("BlogClient").AddHttpMessageHandler<AuthMessageHandler>();
 
-
-
-
-builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+    options.IdleTimeout = TimeSpan.FromMinutes(int.Parse(builder.Configuration["SessionSettings:IdleTimeoutInMinutes"]));
+    options.Cookie.HttpOnly = bool.Parse(builder.Configuration["SessionSettings:CookieHttpOnly"]);
+    options.Cookie.IsEssential = bool.Parse(builder.Configuration["SessionSettings:CookieIsEssential"]);
+    options.Cookie.Name = builder.Configuration["SessionSettings:CookieName"];
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+
+
+app.UseExceptionHandler("/");
+app.UseHsts();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseSession();
 
 app.UseRouting();
@@ -42,5 +43,22 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
+app.Use(async (context, next) =>
+{
+    var cookieName = builder.Configuration["SessionSettings:CookieName"];
+
+    if (!context.Session.Keys.Any() && context.Request.Cookies.ContainsKey(cookieName))
+    {
+        context.Response.Cookies.Delete(cookieName);
+      
+    }
+
+    await next.Invoke();
+
+
+});
+
 
 app.Run();

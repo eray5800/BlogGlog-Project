@@ -34,7 +34,7 @@ namespace BlogProjeMVC.Controllers
 
             IEnumerable<Blog> blogList;
 
-            // Check if session has search results
+           
             string searchResults = HttpContext.Session.GetString("SearchResults");
 
             if (!string.IsNullOrEmpty(searchResults))
@@ -43,17 +43,17 @@ namespace BlogProjeMVC.Controllers
             }
             else
             {
-                // If no search results in session, get all active blogs
+                
                 string fullPath = GetFullPath(basePath, $"GetAllActiveBlogs");
                 blogList = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(fullPath);
             }
 
-            // Set page size and total item count
-            int pageSize = 1; // Sayfa baþýna gösterilecek blog sayýsý
+            
+            int pageSize = 10; 
             int totalItemCount = blogList.Count();
             IPagedList<Blog> pagedBlogs = blogList.ToPagedList(page, pageSize);
 
-            // Load categories
+            
             string categoryPath = GetFullPath(categoryBasePath, "GetAllCategories");
             var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(categoryPath);
             ViewBag.Categories = categories;

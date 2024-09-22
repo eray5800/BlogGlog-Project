@@ -96,16 +96,13 @@ public class AuthController : Controller
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseContent);
 
-                // JWT token'ı session'a ekle
                 HttpContext.Session.SetString("JWToken", tokenResponse.Token);
 
-                // JWT token'ı çözümle ve rolleri session'a ekle
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(tokenResponse.Token);
 
                 var roles = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
 
-                // Rolleri session'a kaydet
                 HttpContext.Session.SetString("UserRoles", string.Join(",", roles));
 
                 return RedirectToAction("Index", "Home");
