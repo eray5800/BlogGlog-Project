@@ -9,37 +9,33 @@ namespace BlogProjeMVC.Controllers.UserOnly
     public class AccountController : Controller
     {
         private readonly HttpClient _httpClient;
+        private readonly string _baseAccountPath;
 
-        public AccountController(IHttpClientFactory httpClientFactory)
+        public AccountController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClient = httpClientFactory.CreateClient("BlogClient");
+            _baseAccountPath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "Account/";
         }
-
-        private string baseAccountPath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Account/";
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // Session'dan rolleri al
             var role = HttpContext.Session.GetString("UserRoles");
 
             if (!string.IsNullOrEmpty(role))
             {
-                // Rolleri kontrol et
                 if (role == "Admin" || role == "Writer" || role == "User")
                 {
-                    // Rolü uygun olan kullanıcı aksiyona devam edebilir
                     await next();
                     return;
                 }
             }
 
-            // Uygun bir rol yoksa yetkisiz sayfasına yönlendir
             context.Result = Unauthorized();
         }
 
         public async Task<IActionResult> Profile()
         {
-            string fullPath = GetFullPath(baseAccountPath, "Profile");
+            string fullPath = GetFullPath(_baseAccountPath, "Profile");
             var userWithBlogs = await _httpClient.GetFromJsonAsync<UserBlogs>(fullPath);
             if (!userWithBlogs.User.EmailConfirmed)
             {
@@ -53,16 +49,15 @@ namespace BlogProjeMVC.Controllers.UserOnly
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
         {
-            string profileFullPath = GetFullPath(baseAccountPath, "Profile");
+            string profileFullPath = GetFullPath(_baseAccountPath, "Profile");
 
             if (!ModelState.IsValid)
             {
                 var userWithBlog = await _httpClient.GetFromJsonAsync<UserBlogs>(profileFullPath);
-
                 return View("Profile", userWithBlog);
             }
 
-            string fullPath = GetFullPath(baseAccountPath, "ChangePassword");
+            string fullPath = GetFullPath(_baseAccountPath, "ChangePassword");
             var response = await _httpClient.PostAsJsonAsync(fullPath, dto);
 
             if (response.IsSuccessStatusCode)
@@ -70,8 +65,8 @@ namespace BlogProjeMVC.Controllers.UserOnly
                 TempData["SuccessMessage"] = "Password updated successfully.";
                 return RedirectToAction("Profile");
             }
-            var userWithBlogs = await _httpClient.GetFromJsonAsync<UserBlogs>(profileFullPath);
 
+            var userWithBlogs = await _httpClient.GetFromJsonAsync<UserBlogs>(profileFullPath);
             await HandleErrorsAsync(response, "Profile", profileFullPath);
             return View("Profile", userWithBlogs);
         }
@@ -79,14 +74,14 @@ namespace BlogProjeMVC.Controllers.UserOnly
         [HttpPost]
         public async Task<IActionResult> RequestEmailChange(ChangeEmailDto dto)
         {
-            string profileFullPath = GetFullPath(baseAccountPath, "Profile");
+            string profileFullPath = GetFullPath(_baseAccountPath, "Profile");
             if (!ModelState.IsValid)
             {
                 var userWithBlog = await _httpClient.GetFromJsonAsync<UserBlogs>(profileFullPath);
                 return View("Profile", userWithBlog);
             }
 
-            string fullPath = GetFullPath(baseAccountPath, "RequestEmailChange");
+            string fullPath = GetFullPath(_baseAccountPath, "RequestEmailChange");
             var response = await _httpClient.PostAsJsonAsync(fullPath, dto);
 
             if (response.IsSuccessStatusCode)
@@ -94,8 +89,8 @@ namespace BlogProjeMVC.Controllers.UserOnly
                 TempData["SuccessMessage"] = "Email change request sent successfully.";
                 return RedirectToAction("Profile");
             }
-            var userWithBlogs = await _httpClient.GetFromJsonAsync<UserBlogs>(profileFullPath);
 
+            var userWithBlogs = await _httpClient.GetFromJsonAsync<UserBlogs>(profileFullPath);
             await HandleErrorsAsync(response, "Profile", profileFullPath);
             return View("Profile", userWithBlogs);
         }

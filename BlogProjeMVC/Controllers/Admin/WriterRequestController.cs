@@ -2,18 +2,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-
 namespace BlogProjeMVC.Controllers.WriterOnly
 {
     [Route("admin/writerrequest")]
     public class WriterRequestController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string adminWriterRequestBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/WriterRequest/";
+        private readonly string _adminWriterRequestBasePath;
 
-        public WriterRequestController(IHttpClientFactory httpClientFactory)
+        public WriterRequestController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClient = httpClientFactory.CreateClient("BlogClient");
+            _adminWriterRequestBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "admin/WriterRequest/";
         }
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -34,7 +34,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpGet("index")]
         public async Task<IActionResult> Index()
         {
-            string fullPath = GetFullPath(adminWriterRequestBasePath, "GetAllWriterRequests");
+            string fullPath = GetFullPath(_adminWriterRequestBasePath, "GetAllWriterRequests");
             var writerRequests = await _httpClient.GetFromJsonAsync<IEnumerable<WriterRequest>>(fullPath);
             return View(writerRequests);
         }
@@ -42,7 +42,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpPost("approve")]
         public async Task<IActionResult> Approve(Guid writerRequestId)
         {
-            string fullPath = GetFullPath(adminWriterRequestBasePath, $"ApproveWriterRequest/{writerRequestId}");
+            string fullPath = GetFullPath(_adminWriterRequestBasePath, $"ApproveWriterRequest/{writerRequestId}");
             var response = await _httpClient.PostAsync(fullPath, null);
 
             if (response.IsSuccessStatusCode)
@@ -57,7 +57,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpPost("reject")]
         public async Task<IActionResult> Reject(Guid writerRequestId)
         {
-            string fullPath = GetFullPath(adminWriterRequestBasePath, $"RejectWriterRequest/{writerRequestId}");
+            string fullPath = GetFullPath(_adminWriterRequestBasePath, $"RejectWriterRequest/{writerRequestId}");
             var response = await _httpClient.PostAsync(fullPath, null);
 
             if (response.IsSuccessStatusCode)

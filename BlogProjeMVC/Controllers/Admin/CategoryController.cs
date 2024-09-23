@@ -8,26 +8,24 @@ namespace BlogProjeMVC.Controllers.Admin
     public class CategoryController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string adminCategoryBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/category/";
+        private readonly string _adminCategoryBasePath;
 
-        public CategoryController(IHttpClientFactory httpClientFactory)
+        public CategoryController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClient = httpClientFactory.CreateClient("BlogClient");
+            _adminCategoryBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "admin/category/";
         }
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // Session'dan rolleri al
             var roles = HttpContext.Session.GetString("UserRoles");
 
-            if (!string.IsNullOrEmpty(roles) && roles== "Admin")
+            if (!string.IsNullOrEmpty(roles) && roles == "Admin")
             {
-                // Admin rolü varsa aksiyona devam et
                 await next();
             }
             else
             {
-                // Admin rolü yoksa yetkili değil sayfasına yönlendir
                 context.Result = Unauthorized();
             }
         }
@@ -36,7 +34,7 @@ namespace BlogProjeMVC.Controllers.Admin
         [HttpGet("index")]
         public async Task<IActionResult> Index()
         {
-            string fullPath = GetFullPath(adminCategoryBasePath, "GetAllCategories");
+            string fullPath = GetFullPath(_adminCategoryBasePath, "GetAllCategories");
             var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(fullPath);
             return View(categories);
         }
@@ -50,7 +48,7 @@ namespace BlogProjeMVC.Controllers.Admin
         [HttpPost("create")]
         public async Task<IActionResult> Create(CategoryDTO categoryDto)
         {
-            string fullPath = GetFullPath(adminCategoryBasePath, "AddCategory");
+            string fullPath = GetFullPath(_adminCategoryBasePath, "AddCategory");
             var response = await _httpClient.PostAsJsonAsync(fullPath, categoryDto);
 
             if (response.IsSuccessStatusCode)
@@ -65,7 +63,7 @@ namespace BlogProjeMVC.Controllers.Admin
         [HttpGet("update")]
         public async Task<IActionResult> Update([FromQuery] Guid categoryID)
         {
-            string fullPath = GetFullPath(adminCategoryBasePath, $"GetCategoryByID/{categoryID}");
+            string fullPath = GetFullPath(_adminCategoryBasePath, $"GetCategoryByID/{categoryID}");
             CategoryDTO category = await _httpClient.GetFromJsonAsync<CategoryDTO>(fullPath);
 
             return View(category);
@@ -76,7 +74,7 @@ namespace BlogProjeMVC.Controllers.Admin
         {
             if (ModelState.IsValid)
             {
-                string fullPath = GetFullPath(adminCategoryBasePath, $"UpdateCategory/{categoryDTO.CategoryID}");
+                string fullPath = GetFullPath(_adminCategoryBasePath, $"UpdateCategory/{categoryDTO.CategoryID}");
                 var response = await _httpClient.PutAsJsonAsync(fullPath, categoryDTO);
 
                 if (response.IsSuccessStatusCode)
@@ -93,7 +91,7 @@ namespace BlogProjeMVC.Controllers.Admin
         [HttpPost("delete")]
         public async Task<IActionResult> Delete(Guid categoryID)
         {
-            string fullPath = GetFullPath(adminCategoryBasePath, $"DeleteCategory/{categoryID}");
+            string fullPath = GetFullPath(_adminCategoryBasePath, $"DeleteCategory/{categoryID}");
             var response = await _httpClient.DeleteAsync(fullPath);
 
             if (response.IsSuccessStatusCode)

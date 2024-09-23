@@ -8,17 +8,16 @@ using System.Text;
 
 public class AuthController : Controller
 {
-
     private readonly HttpClient _httpClient;
+    private readonly string _baseApiUrl;
+    private readonly string _baseAccountApiUrl;
 
-    public AuthController(IHttpClientFactory httpClientFactory)
+    public AuthController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
         _httpClient = httpClientFactory.CreateClient("BlogClient");
+        _baseApiUrl = configuration.GetValue<string>("ApiSettings:BaseUrl") + "Auth/";
+        _baseAccountApiUrl = configuration.GetValue<string>("ApiSettings:BaseUrl") + "Account/";
     }
-
-    private string basePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Auth/";
-    private string baseAccountPath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Account/";
-
 
     [HttpGet]
     public IActionResult Register()
@@ -32,7 +31,7 @@ public class AuthController : Controller
         if (ModelState.IsValid)
         {
             var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{basePath}register", content);
+            var response = await _httpClient.PostAsync(GetFullPath(_baseApiUrl, "register"), content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -51,7 +50,6 @@ public class AuthController : Controller
         return View(model);
     }
 
-
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> EmailConfirmationSent(string onlyView = null)
@@ -62,7 +60,7 @@ public class AuthController : Controller
         }
         else
         {
-            string fullPath = GetFullPath(baseAccountPath, "SendEmailConfirmationMail");
+            string fullPath = GetFullPath(_baseAccountApiUrl, "SendEmailConfirmationMail");
             var response = await _httpClient.GetFromJsonAsync<ApiResponse>(fullPath);
 
             if (response != null && response.Success)
@@ -73,9 +71,6 @@ public class AuthController : Controller
             return BadRequest(response?.Message ?? "Failed to send confirmation email.");
         }
     }
-
-
-
 
     [HttpGet]
     public IActionResult Login()
@@ -90,7 +85,7 @@ public class AuthController : Controller
         {
             var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(GetFullPath(basePath, "login"), content);
+            var response = await _httpClient.PostAsync(GetFullPath(_baseApiUrl, "login"), content);
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
@@ -112,9 +107,7 @@ public class AuthController : Controller
         return View(model);
     }
 
-
     [HttpGet]
-
     public IActionResult Logout()
     {
         HttpContext.Session.Remove("JWToken");
@@ -124,8 +117,6 @@ public class AuthController : Controller
 
     public string GetFullPath(string basePath, string actionName)
     {
-
         return string.Concat(basePath, actionName);
     }
-
 }

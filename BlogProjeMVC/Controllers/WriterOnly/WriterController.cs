@@ -1,7 +1,6 @@
 ﻿using DAL.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Net.Http.Json;
 
 namespace BlogProjeMVC.Controllers.WriterOnly
 {
@@ -9,11 +8,12 @@ namespace BlogProjeMVC.Controllers.WriterOnly
     public class WriterController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string writerBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/writer/";
+        private readonly string _writerBasePath;
 
-        public WriterController(IHttpClientFactory httpClientFactory)
+        public WriterController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClient = httpClientFactory.CreateClient("BlogClient");
+            _writerBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "writer/";
         }
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -33,7 +33,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpPost("addwriterrequest")]
         public async Task<IActionResult> AddWriterRequest(WriterRequestDTO requestDTO)
         {
-            string fullPath = GetFullPath(writerBasePath, "AddWriterRequest");
+            string fullPath = GetFullPath(_writerBasePath, "AddWriterRequest");
             var response = await _httpClient.PostAsJsonAsync(fullPath, requestDTO);
 
             if (response.IsSuccessStatusCode)
@@ -41,7 +41,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 TempData["SuccessMessage"] = "Your request was sent to Admin. Please wait for approval.";
                 return RedirectToAction("Index", "Home");
             }
-            if(response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
                 return RedirectToAction("EmailConfirmationSent", "Auth");
             }

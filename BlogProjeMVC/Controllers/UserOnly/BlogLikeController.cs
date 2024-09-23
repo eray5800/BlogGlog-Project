@@ -1,8 +1,5 @@
 ﻿using DAL.Models.DTO.BlogDTO;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace BlogProjeMVC.Controllers.UserOnly
 {
@@ -10,11 +7,12 @@ namespace BlogProjeMVC.Controllers.UserOnly
     public class BlogLikeController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string BlogLikeBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/BlogLike/";
+        private readonly string _blogLikeBasePath;
 
-        public BlogLikeController(IHttpClientFactory httpClientFactory)
+        public BlogLikeController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClient = httpClientFactory.CreateClient("BlogClient");
+            _blogLikeBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "BlogLike/";
         }
 
         [HttpPost]
@@ -24,7 +22,7 @@ namespace BlogProjeMVC.Controllers.UserOnly
             {
                 BlogID = blogID
             };
-            var response = await _httpClient.PostAsJsonAsync(GetFullPath(BlogLikeBasePath, $"AddBlogLike"), saveBlogLikeDTO);
+            var response = await _httpClient.PostAsJsonAsync(GetFullPath(_blogLikeBasePath, "AddBlogLike"), saveBlogLikeDTO);
             if (response.IsSuccessStatusCode)
             {
                 return RedirectToAction("Detail", "Blog", new { id = blogID });
@@ -35,11 +33,10 @@ namespace BlogProjeMVC.Controllers.UserOnly
             }
         }
 
-
         [HttpPost]
         public async Task<IActionResult> RemoveBlogLike(Guid blogID)
         {
-            var response = await _httpClient.DeleteAsync(GetFullPath(BlogLikeBasePath, $"RemoveBlogLike/{blogID}"));
+            var response = await _httpClient.DeleteAsync(GetFullPath(_blogLikeBasePath, $"RemoveBlogLike/{blogID}"));
 
             if (response.IsSuccessStatusCode)
             {
@@ -51,12 +48,10 @@ namespace BlogProjeMVC.Controllers.UserOnly
             }
         }
 
-
         [HttpGet]
-
         public async Task<IActionResult> GetUserBlogLike(Guid blogID)
         {
-            var response = await _httpClient.GetAsync(GetFullPath(BlogLikeBasePath, $"GetUserBlogLike/{blogID}"));
+            var response = await _httpClient.GetAsync(GetFullPath(_blogLikeBasePath, $"GetUserBlogLike/{blogID}"));
 
             if (response.IsSuccessStatusCode)
             {
@@ -70,10 +65,9 @@ namespace BlogProjeMVC.Controllers.UserOnly
         }
 
         [HttpGet]
-
         public async Task<IActionResult> GetBlogLikes(Guid blogID)
         {
-            var response = await _httpClient.GetAsync(GetFullPath(BlogLikeBasePath, $"GetBlogLikes/{blogID}"));
+            var response = await _httpClient.GetAsync(GetFullPath(_blogLikeBasePath, $"GetBlogLikes/{blogID}"));
 
             if (response.IsSuccessStatusCode)
             {

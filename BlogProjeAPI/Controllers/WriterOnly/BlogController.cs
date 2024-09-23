@@ -29,6 +29,7 @@ namespace BlogProjeAPI.Controllers.WriterOnly
             _blogService = blogService;
             _userManager = userManager;
             _configuration = configuration;
+            
         }
 
         [HttpGet]

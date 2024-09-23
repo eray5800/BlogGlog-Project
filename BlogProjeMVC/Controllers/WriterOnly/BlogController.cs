@@ -13,18 +13,20 @@ namespace BlogProjeMVC.Controllers.WriterOnly
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly string _categoryBasePath;
+        private readonly string _blogBasePath;
+        private readonly string _blogImageBasePath;
+        private readonly string _blogLikeBasePath;
 
-        public BlogController(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
+        public BlogController(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         {
             _httpClient = httpClientFactory.CreateClient("BlogClient");
             _httpContextAccessor = httpContextAccessor;
+            _categoryBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "admin/category/";
+            _blogBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "Blog/";
+            _blogImageBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "Blog/GetImage/";
+            _blogLikeBasePath = configuration.GetValue<string>("ApiSettings:BaseUrl") + "BlogLike/";
         }
-
-        private readonly string categoryBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/admin/category/";
-        private readonly string blogBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/";
-        private readonly string BlogImageBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/Blog/GetImage/";
-        private readonly string BlogLikeBasePath = "https://blogprojeapi20240904220317.azurewebsites.net/api/BlogLike/";
-
 
         private bool IsUserInRole(string role)
         {
@@ -39,7 +41,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 return Unauthorized();
             }
 
-            var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(GetFullPath(categoryBasePath, "GetAllActiveCategories"));
+            var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(GetFullPath(_categoryBasePath, "GetAllActiveCategories"));
             ViewBag.Categories = categories;
             return View();
         }
@@ -77,7 +79,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
         [HttpGet("{blogID}")]
         public async Task<IActionResult> Detail(Guid blogID)
         {
-            var fullPath = GetFullPath(blogBasePath, $"GetActiveBlogByID/{blogID}");
+            var fullPath = GetFullPath(_blogBasePath, $"GetActiveBlogByID/{blogID}");
 
             try
             {
@@ -86,14 +88,14 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 if (response.IsSuccessStatusCode)
                 {
                     var blog = await response.Content.ReadFromJsonAsync<Blog>();
-                    ViewBag.BlogImageBasePath = BlogImageBasePath;
+                    ViewBag.BlogImageBasePath = _blogImageBasePath;
 
-                    var BlogImagesResponse = await _httpClient.GetAsync(GetFullPath(BlogLikeBasePath, $"GetBlogLikes/{blogID}"));
+                    var BlogImagesResponse = await _httpClient.GetAsync(GetFullPath(_blogLikeBasePath, $"GetBlogLikes/{blogID}"));
                     ViewBag.BlogLikeCount = await BlogImagesResponse.Content.ReadAsStringAsync();
 
                     if (IsUserInRole("Admin") || IsUserInRole("Writer") || IsUserInRole("User"))
                     {
-                        var UserLike = await _httpClient.GetFromJsonAsync<BlogLike>(GetFullPath(BlogLikeBasePath, $"GetUserBlogLike/{blogID}"));
+                        var UserLike = await _httpClient.GetFromJsonAsync<BlogLike>(GetFullPath(_blogLikeBasePath, $"GetUserBlogLike/{blogID}"));
                         ViewBag.UserLike = UserLike.BlogLikeID != Guid.Empty ? true : false;
                     }
                     else
@@ -125,7 +127,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 return Unauthorized();
             }
 
-            var blog = await _httpClient.GetFromJsonAsync<Blog>(GetFullPath(blogBasePath, $"GetBlogByID/{blogID}"));
+            var blog = await _httpClient.GetFromJsonAsync<Blog>(GetFullPath(_blogBasePath, $"GetBlogByID/{blogID}"));
 
             if (blog == null)
             {
@@ -142,7 +144,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 IsActive = blog.IsActive,
             };
 
-            var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(GetFullPath(categoryBasePath, "GetAllActiveCategories"));
+            var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(GetFullPath(_categoryBasePath, "GetAllActiveCategories"));
             ViewBag.Categories = categories;
 
             return View(blogDTO);
@@ -171,8 +173,6 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 return await ImageProcessingFailed(blogDto);
             }
             var response = await SendPutRequestAsync($"UpdateBlog/{blogDto.BlogID}", blogDto);
-
-
 
             return response.IsSuccessStatusCode
                 ? RedirectToAction("Index", "Home")
@@ -205,7 +205,7 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 }
                 else
                 {
-                   return false;
+                    return false;
                 }
             }
             return true;
@@ -236,9 +236,10 @@ namespace BlogProjeMVC.Controllers.WriterOnly
             }
             return true;
         }
+
         private async Task LoadCategoriesAsync()
         {
-            var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(GetFullPath(categoryBasePath, "GetAllActiveCategories"));
+            var categories = await _httpClient.GetFromJsonAsync<IEnumerable<Category>>(GetFullPath(_categoryBasePath, "GetAllActiveCategories"));
             ViewBag.Categories = categories;
         }
 
@@ -250,14 +251,12 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 return RedirectToAction("Index", "Home");
             }
 
-            var blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(GetFullPath(blogBasePath, $"Search?Text={textSearch}"));
+            var blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(GetFullPath(_blogBasePath, $"Search?Text={textSearch}"));
 
             HttpContext.Session.SetString("SearchResults", JsonConvert.SerializeObject(blogs));
 
             return RedirectToAction("Index", "Home");
         }
-
-
 
         public async Task<IActionResult> CategorySearch([FromQuery] string categoryName)
         {
@@ -267,20 +266,17 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 return RedirectToAction("Index", "Home");
             }
 
-            var blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(GetFullPath(blogBasePath, $"CategorySearch?Text={categoryName}"));
+            var blogs = await _httpClient.GetFromJsonAsync<IEnumerable<Blog>>(GetFullPath(_blogBasePath, $"CategorySearch?Text={categoryName}"));
 
             HttpContext.Session.SetString("SearchResults", JsonConvert.SerializeObject(blogs));
 
             return RedirectToAction("Index", "Home");
         }
 
-
-        
-
         [HttpPost("{blogID}")]
         public async Task<IActionResult> DeleteBlog(Guid blogID)
         {
-            if (!IsUserAuthorized()) 
+            if (!IsUserAuthorized())
             {
                 return UnauthorizedResult();
             }
@@ -291,8 +287,6 @@ namespace BlogProjeMVC.Controllers.WriterOnly
                 ? RedirectToAction("Index", "Home")
                 : await HandleApiError(response, new BlogDTO { BlogID = blogID });
         }
-
-
 
         public string GetFullPath(string basePath, string actionName)
         {
@@ -335,17 +329,17 @@ namespace BlogProjeMVC.Controllers.WriterOnly
 
         private async Task<HttpResponseMessage> SendPutRequestAsync(string endpoint, BlogDTO blogDto)
         {
-            return await _httpClient.PutAsJsonAsync(GetFullPath(blogBasePath, endpoint), blogDto);
+            return await _httpClient.PutAsJsonAsync(GetFullPath(_blogBasePath, endpoint), blogDto);
         }
 
         private async Task<HttpResponseMessage> SendPostRequestAsync(string endpoint, BlogDTO blogDto)
         {
-            return await _httpClient.PostAsJsonAsync(GetFullPath(blogBasePath, endpoint), blogDto);
+            return await _httpClient.PostAsJsonAsync(GetFullPath(_blogBasePath, endpoint), blogDto);
         }
 
         private async Task<HttpResponseMessage> SendDeleteRequestAsync(string endpoint)
         {
-            return await _httpClient.DeleteAsync(GetFullPath(blogBasePath, endpoint));
+            return await _httpClient.DeleteAsync(GetFullPath(_blogBasePath, endpoint));
         }
 
         private async Task<IActionResult> HandleApiError(HttpResponseMessage response, BlogDTO blogDto)
