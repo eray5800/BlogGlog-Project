@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace BlogProjeMVC.Controllers.UserOnly
 {
+    [AutoValidateAntiforgeryToken]
+
     public class AccountController : Controller
     {
         private readonly HttpClient _httpClient;

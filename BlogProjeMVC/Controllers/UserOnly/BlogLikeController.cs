@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace BlogProjeMVC.Controllers.UserOnly
 {
     [Route("/[controller]/[action]")]
+    [AutoValidateAntiforgeryToken]
+
     public class BlogLikeController : Controller
     {
         private readonly HttpClient _httpClient;

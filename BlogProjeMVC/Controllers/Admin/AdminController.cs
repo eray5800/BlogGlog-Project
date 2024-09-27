@@ -3,6 +3,7 @@
 namespace BlogProjeMVC.Controllers.Admin
 {
     [Route("admin")]
+    [AutoValidateAntiforgeryToken]
     public class AdminController : Controller
     {
         private readonly IHttpContextAccessor _httpContextAccessor;

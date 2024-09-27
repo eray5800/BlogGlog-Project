@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace BlogProjeMVC.Controllers.Admin
 {
     [Route("admin/category")]
+    [AutoValidateAntiforgeryToken]
+
     public class CategoryController : Controller
     {
         private readonly HttpClient _httpClient;

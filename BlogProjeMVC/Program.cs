@@ -21,6 +21,12 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = bool.Parse(builder.Configuration["SessionSettings:CookieHttpOnly"]);
     options.Cookie.IsEssential = bool.Parse(builder.Configuration["SessionSettings:CookieIsEssential"]);
     options.Cookie.Name = builder.Configuration["SessionSettings:CookieName"];
+    options.Cookie.HttpOnly = bool.Parse(builder.Configuration["SessionSettings:CookieHttpOnly"]);
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+
+
+
 });
 
 var app = builder.Build();

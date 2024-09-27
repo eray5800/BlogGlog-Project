@@ -6,11 +6,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
+[AutoValidateAntiforgeryToken]
 public class AuthController : Controller
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseApiUrl;
     private readonly string _baseAccountApiUrl;
+
 
     public AuthController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
@@ -79,6 +81,7 @@ public class AuthController : Controller
     }
 
     [HttpPost]
+
     public async Task<IActionResult> Login(AuthLoginDTO model)
     {
         if (ModelState.IsValid)

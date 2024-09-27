@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace BlogProjeMVC.Controllers.WriterOnly
 {
     [Route("writer")]
+    [AutoValidateAntiforgeryToken]
+
     public class WriterController : Controller
     {
         private readonly HttpClient _httpClient;

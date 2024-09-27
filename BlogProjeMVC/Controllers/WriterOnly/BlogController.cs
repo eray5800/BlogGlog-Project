@@ -9,6 +9,8 @@ using System.Text;
 namespace BlogProjeMVC.Controllers.WriterOnly
 {
     [Route("/[controller]/[action]")]
+    [AutoValidateAntiforgeryToken]
+
     public class BlogController : Controller
     {
         private readonly HttpClient _httpClient;
